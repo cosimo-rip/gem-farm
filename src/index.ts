@@ -5,13 +5,13 @@ export * from './gem-farm';
 export * from './gem-common';
 
 export const GEM_BANK_PROG_ID = new PublicKey(
-  'B2fbYCCZkp8mwvrgX6BEbBhDdPW14rVEwiwhojjm38Ge'
+  'GYNSEV4TSs4ThHkj7e6AhTKRMsRmSZSJspub8Yy5KjHX'
 );
 export const GEM_FARM_PROG_ID = new PublicKey(
-  'GG6iehLWiPscJxhqqcTTE8U7vSpFy4bV7JoDG3joReuh'
+  '4FACvuyBqoAaZYapbyZvfCW8Dcj9pC4rbLWb5bmR34mg'
 );
 export const WALLET_NFT_CREATOR_FILTER = new PublicKey(
-  'CYpEkjDkMGBiWdoTC5XTUtzartQ974SAVP55CSfpP19B'
+  'Bhr9iWx7vAZ4JDD5DVSdHxQLqG9RvCLCSXvu6yC4TF6c'
 );
 
 export const ACTIVE_FARM_ID = 'As7aTouXTpZ9tAxzHcF8MvDFqTKmJrbwsaaeCmyr2rwF';

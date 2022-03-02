@@ -15,7 +15,7 @@ const clusterURLMapping = {
   localnet: process.env.VUE_APP_LOCALNET_URL || 'http://localhost:8899',
 };
 
-const cluster = ref<Cluster>(Cluster.Devnet);
+const cluster = ref<Cluster>(Cluster.Mainnet);
 
 export default function useCluster() {
   const getClusterURL = (): string => clusterURLMapping[cluster.value];
