@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="mb-4">{{PAGE_TITLE}} MGMT</h1>
+    <h1 class="mb-4 w-60 md:w-auto h-8 md:h-4 text-xl md:text-4xl">{{PAGE_TITLE}} MGMT</h1>
     
     <div v-if="wallet" class="absolute top-8 right-8">
       <ConfigPane />
