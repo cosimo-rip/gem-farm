@@ -19,7 +19,7 @@
       <div v-if="activeRewardType === 'fixed'">
         <div class="flex mb-5">
           <div class="nes-field mr-5 flex-1">
-            <label for="baseRate">Base rate (tokens/gem/s):</label>
+            <label for="baseRate">Base rate (tokens/nft/s):</label>
             <input
               id="baseRate"
               type="text"
@@ -40,7 +40,7 @@
         <!--t1-->
         <div class="flex mb-5">
           <div class="nes-field mr-5 flex-1">
-            <label for="t1RewardRate">Tier 1 reward rate (tokens/gem/s):</label>
+            <label for="t1RewardRate">Tier 1 reward rate (tokens/nft/s):</label>
             <input
               id="t1RewardRate"
               type="text"
@@ -61,7 +61,7 @@
         <!--t2-->
         <div class="flex mb-5">
           <div class="nes-field mr-5 flex-1">
-            <label for="t2RewardRate">Tier 2 reward rate (tokens/gem/s):</label>
+            <label for="t2RewardRate">Tier 2 reward rate (tokens/nft/s):</label>
             <input
               id="t2RewardRate"
               type="text"
@@ -82,7 +82,7 @@
         <!--t3-->
         <div class="flex mb-5">
           <div class="nes-field mr-5 flex-1">
-            <label for="t3RewardRate">Tier 3 reward rate (tokens/gem/s):</label>
+            <label for="t3RewardRate">Tier 3 reward rate (tokens/nft/s):</label>
             <input
               id="t3RewardRate"
               type="text"
@@ -111,16 +111,16 @@
         <input id="duration" type="text" class="nes-input" v-model="duration" />
       </div>
       <!--buttons-->
-      <div class="flex mb-5">
-        <button type="submit" class="nes-btn is-primary mr-5">Fund</button>
+      <div class="flex">
+        <button type="submit" class="is-primary mr-5 primary">Fund</button>
         <button
           type="button"
-          class="nes-btn is-error mr-5"
+          class="is-error mr-5 primary"
           @click="cancelReward"
         >
           Cancel
         </button>
-        <button type="button" class="nes-btn is-warning" @click="lockReward">
+        <button type="button" class="is-warning primary" @click="lockReward">
           Lock
         </button>
       </div>
@@ -130,7 +130,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import useWallet from '@/composables/wallet';
+import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
 import { PublicKey } from '@solana/web3.js';
@@ -142,20 +142,20 @@ export default defineComponent({
   },
   emits: ['update-farm'],
   setup(props, ctx) {
-    const { wallet, getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
     watch([wallet, cluster], async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
       }
     });
 
     //need an onmounted hook because this component isn't yet mounted when wallet/cluster are set
     onMounted(async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
         setRewardType(selectedReward.value);
       }
     });

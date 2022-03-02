@@ -4,16 +4,16 @@
     <form @submit.prevent="refreshFarmer">
       <div class="nes-field mb-5">
         <label for="farmer">Farmer to refresh:</label>
-        <input id="farmer" v-model="farmer" class="nes-input" />
+        <input type="text" id="farmer" v-model="farmer"  />
       </div>
-      <button class="mb-5 nes-btn is-primary" type="submit">Refresh</button>
+      <button class="mb-5 is-primary primary" type="submit">Refresh</button>
     </form>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import useWallet from '@/composables/wallet';
+import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
 import { PublicKey } from '@solana/web3.js';
@@ -23,18 +23,18 @@ export default defineComponent({
     farm: String,
   },
   setup(props, ctx) {
-    const { wallet, getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
     watch([wallet, cluster], async () => {
-      gf = await initGemFarm(getConnection(), getWallet()!);
+      gf = await initGemFarm(getConnection(), wallet.value as any);
     });
 
     //need an onmounted hook because this component isn't yet mounted when wallet/cluster are set
     onMounted(async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
       }
     });
 

@@ -1,94 +1,135 @@
 <template>
-  <ConfigPane />
-  <div v-if="!wallet" class="text-center">Pls connect (burner) wallet</div>
-  <div v-else>
-    <!--farm address-->
-    <div class="nes-container with-title mb-10">
-      <p class="title">Connect to a Farm</p>
-      <div class="nes-field mb-5">
-        <label for="farm">Farm address:</label>
-        <input id="farm" class="nes-input" v-model="farm" />
-      </div>
+  <div>
+    <h1 class="mb-4 w-60 md:w-auto h-8 md:h-4 text-xl md:text-4xl">{{PAGE_TITLE}}</h1>
+
+    <div v-if="wallet" class="absolute top-8 right-10">
+      <ConfigPane />
     </div>
 
-    <div v-if="farmerAcc">
-      <FarmerDisplay
-        :key="farmerAcc"
-        :farm="farm"
-        :farmAcc="farmAcc"
-        :farmer="farmer"
-        :farmerAcc="farmerAcc"
-        class="mb-10"
-        @refresh-farmer="handleRefreshFarmer"
-      />
-      <Vault
-        :key="farmerAcc"
-        class="mb-10"
-        :vault="farmerAcc.vault.toBase58()"
-        @selected-wallet-nft="handleNewSelectedNFT"
-      >
-        <button
-          v-if="farmerState === 'staked' && selectedNFTs.length > 0"
-          class="nes-btn is-primary mr-5"
-          @click="addGems"
-        >
-          Add Gems (resets staking)
-        </button>
-        <button
-          v-if="farmerState === 'unstaked'"
-          class="nes-btn is-success mr-5"
-          @click="beginStaking"
-        >
-          Begin staking
-        </button>
-        <button
-          v-if="farmerState === 'staked'"
-          class="nes-btn is-error mr-5"
-          @click="endStaking"
-        >
-          End staking
-        </button>
-        <button
-          v-if="farmerState === 'pendingCooldown'"
-          class="nes-btn is-error mr-5"
-          @click="endStaking"
-        >
-          End cooldown
-        </button>
-        <button class="nes-btn is-warning" @click="claim">
-          Claim {{ availableA }} A / {{ availableB }} B
-        </button>
-      </Vault>
-    </div>
-    <div v-else>
-      <div class="w-full text-center mb-5">
-        Farmer account not found :( Create a new one?
+    <div v-if="!wallet">
+      <div class="text-center h-full flex bg-gray-200" style="min-height: calc(100vh - 150px)">
+        <div class="m-auto">
+          <div class="text-center mb-5">Connect your wallet to begin</div>
+
+          <div class="text-center mx-auto inline-block">
+            <ConfigPane />
+          </div>
+        </div>
       </div>
-      <div class="w-full text-center">
-        <button class="nes-btn is-primary" @click="initFarmer">
-          New Farmer
-        </button>
+    </div>
+    <div v-else class="relative">
+      <div v-if="farmerAcc">
+        <div class="h-full bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
+          <FarmerRewardDisplay
+            :key="farmerAcc.rewardA"
+            :farmReward="farmAcc.rewardA"
+            :farmAcc="farmAcc"
+            :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
+          />
+          <FarmerDisplay
+            :key="farmerAcc"
+            :farm="farm"
+            :farmAcc="farmAcc"
+            :farmer="farmer"
+            :farmerAcc="farmerAcc"
+            @refresh-farmer="handleRefreshFarmer"
+          />
+          <Vault
+            :key="farmerAcc"
+            class="mb-10"
+            :vault="farmerAcc.vault.toBase58()"
+            :farmerState="farmerState"
+            :cooldownEndsTs="farmerAcc.cooldownEndsTs"
+            :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
+            @selected-wallet-nft="handleNewSelectedNFT"
+          >
+            <!-- <button
+              v-if="farmerState === 'staked' && selectedNFTs.length > 0"
+              class="is-primary mr-5 primary"
+              @click="addGems"
+            >
+              Add {{NFT_SHORT_NAME}}
+            </button> -->
+            <button
+              v-if="farmerState === 'unstaked' && farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
+              class="is-success mr-5 primary"
+              @click="beginStaking"
+            >
+              {{STAKE_NAME}} {{NFT_SHORT_NAME}}
+            </button>
+            <button
+              v-if="farmerState === 'staked'"
+              class="is-error mr-5 primary"
+              @click="endStaking"
+            >
+              {{UNSTAKE_NAME}} {{NFT_SHORT_NAME}}
+            </button>
+            <button
+              v-if="farmerState === 'pendingCooldown' && farmerAcc.cooldownEndsTs < currentTS / 1000"
+              class="is-error mr-5 primary"
+              @click="endStaking"
+            >
+              Retrieve {{NFT_SHORT_NAME}}
+            </button>
+            <button class="primary" v-if="(((farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward) / (1000000000)) + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) > 0" @click="claim">
+              Claim ${{SPL_TOKEN_NAME}} {{(((farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward) / (1000000000)) + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator))}}
+              
+            </button>
+          </Vault>
+          <div>a {{this.currentTS}} {{(Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs)}}</div>
+        </div>
+      </div>
+      <div v-else>
+        <div class="text-center h-full flex bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
+          <div class="m-auto">
+            <div v-if="fetchingFarmFailed">
+              Connection Issues. Please reload and try again.
+            </div>
+            <div v-else>
+              <div class="w-full text-center mb-5">
+                Before you can {{STAKE_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}, you'll need a {{VAULT_NAME.toLowerCase()}}.
+              </div>
+              <div class="w-full text-center">
+                <button class="is-primary primary text-center" @click="initFarmer">
+                  New {{VAULT_NAME}}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, ref, watch } from 'vue';
-import useWallet from '@/composables/wallet';
+import { defineComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
 import { PublicKey } from '@solana/web3.js';
 import ConfigPane from '@/components/ConfigPane.vue';
 import FarmerDisplay from '@/components/gem-farm/FarmerDisplay.vue';
+import FarmerRewardDisplay from '@/components/gem-farm/FarmerRewardDisplay.vue'
 import Vault from '@/components/gem-bank/Vault.vue';
 import { INFT } from '@/common/web3/NFTget';
-import { findFarmerPDA, stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
+import { findFarmerPDA, stringifyPKsAndBNs, PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID, COOLING_DOWN_NAME } from '../../../../src';
+import App from '../App.vue'
+import VueToast from 'vue-toast-notification';
 
 export default defineComponent({
-  components: { Vault, FarmerDisplay, ConfigPane },
+  components: { Vault, FarmerDisplay, FarmerRewardDisplay, ConfigPane },
+
+  created() {
+    const interval = setInterval(() => {
+      this.currentTS = Date.now()
+      console.log(this.currentTS)
+    }, 5000)
+    onUnmounted(() => clearInterval(interval))
+  },
+
   setup() {
-    const { wallet, getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
@@ -102,7 +143,7 @@ export default defineComponent({
     });
 
     // --------------------------------------- farmer details
-    const farm = ref<string>();
+    const farm = ref<string>(ACTIVE_FARM_ID);
     const farmAcc = ref<any>();
 
     const farmerIdentity = ref<string>();
@@ -112,10 +153,7 @@ export default defineComponent({
     const availableA = ref<string>();
     const availableB = ref<string>();
 
-    //auto loading for when farm changes
-    watch(farm, async () => {
-      await freshStart();
-    });
+    const fetchingFarmFailed = ref<boolean>(false);
 
     const updateAvailableRewards = async () => {
       availableA.value = farmerAcc.value.rewardA.accruedReward
@@ -137,9 +175,9 @@ export default defineComponent({
     const fetchFarmer = async () => {
       const [farmerPDA] = await findFarmerPDA(
         new PublicKey(farm.value!),
-        getWallet()!.publicKey!
+        wallet.value!.publicKey!
       );
-      farmerIdentity.value = getWallet()!.publicKey?.toBase58();
+      farmerIdentity.value = wallet.value!.publicKey?.toBase58();
       farmerAcc.value = await gf.fetchFarmerAcc(farmerPDA);
       farmerState.value = gf.parseFarmerState(farmerAcc.value);
       await updateAvailableRewards();
@@ -150,9 +188,9 @@ export default defineComponent({
     };
 
     const freshStart = async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
-        farmerIdentity.value = getWallet()!.publicKey?.toBase58();
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
+        farmerIdentity.value = wallet.value!.publicKey?.toBase58();
 
         //reset stuff
         farmAcc.value = undefined;
@@ -164,28 +202,46 @@ export default defineComponent({
         try {
           await fetchFarn();
           await fetchFarmer();
+          fetchingFarmFailed.value = false;
         } catch (e) {
           console.log(`farm with PK ${farm.value} not found :(`);
+          console.log(e);
+          // fetchingFarmFailed.value = true;
         }
       }
     };
 
     const initFarmer = async () => {
-      await gf.initFarmerWallet(new PublicKey(farm.value!));
-      await fetchFarmer();
+      try {
+        await gf.initFarmerWallet(new PublicKey(farm.value));
+        await fetchFarmer();
+      } catch (error) {
+
+        App.$toast.open("Failed to create " + VAULT_NAME + ".");
+      }
     };
 
     // --------------------------------------- staking
     const beginStaking = async () => {
-      await gf.stakeWallet(new PublicKey(farm.value!));
-      await fetchFarmer();
-      selectedNFTs.value = [];
+      try {
+        await gf.stakeWallet(new PublicKey(farm.value));
+        await fetchFarmer();
+        selectedNFTs.value = [];
+      } catch (error) {
+
+        App.$toast.open("Staking Failed");
+      }
     };
 
     const endStaking = async () => {
-      await gf.unstakeWallet(new PublicKey(farm.value!));
-      await fetchFarmer();
-      selectedNFTs.value = [];
+      try {
+        await gf.unstakeWallet(new PublicKey(farm.value!));
+        await fetchFarmer();
+        selectedNFTs.value = [];
+      } catch (error) {
+        console.log("end staking failed")
+        App.$toast.open("End Staking Failed.");
+      }
     };
 
     const claim = async () => {
@@ -209,39 +265,40 @@ export default defineComponent({
       selectedNFTs.value = newSelectedNFTs;
     };
 
-    const addSingleGem = async (
-      gemMint: PublicKey,
-      gemSource: PublicKey,
-      creator: PublicKey
-    ) => {
-      await gf.flashDepositWallet(
-        new PublicKey(farm.value!),
-        '1',
-        gemMint,
-        gemSource,
-        creator
-      );
-      await fetchFarmer();
-    };
+    // const addSingleGem = async (
+    //   gemMint: PublicKey,
+    //   gemSource: PublicKey,
+    //   creator: PublicKey
+    // ) => {
+    //   await gf.flashDepositWallet(
+    //     new PublicKey(farm),
+    //     '1',
+    //     gemMint,
+    //     gemSource,
+    //     creator
+    //   );
+    //   await fetchFarmer();
+    // };
 
-    const addGems = async () => {
-      await Promise.all(
-        selectedNFTs.value.map((nft) => {
-          const creator = new PublicKey(
-            //todo currently simply taking the 1st creator
-            (nft.onchainMetadata as any).data.creators[0].address
-          );
-          console.log('creator is', creator.toBase58());
+    // const addGems = async () => {
+    //   await Promise.all(
+    //     selectedNFTs.value.map((nft) => {
+    //       const creator = new PublicKey(
+    //         //todo currently simply taking the 1st creator
+    //         (nft.onchainMetadata as any).data.creators[0].address
+    //       );
+    //       console.log('creator is', creator.toBase58());
 
-          addSingleGem(nft.mint, nft.pubkey!, creator);
-        })
-      );
-      console.log(
-        `added another ${selectedNFTs.value.length} gems into staking vault`
-      );
-    };
+    //       addSingleGem(nft.mint, nft.pubkey!, creator);
+    //     })
+    //   );
+    //   console.log(
+    //     `added another ${selectedNFTs.value.length} gems into staking vault`
+    //   );
+    // };
 
     return {
+      currentTS: Date.now(),
       wallet,
       farm,
       farmAcc,
@@ -257,7 +314,14 @@ export default defineComponent({
       handleRefreshFarmer,
       selectedNFTs,
       handleNewSelectedNFT,
-      addGems,
+      fetchingFarmFailed,
+      // addGems,
+      PAGE_TITLE,
+      VAULT_NAME, 
+      SPL_TOKEN_NAME,
+      STAKE_NAME,
+      NFT_SHORT_NAME,
+      UNSTAKE_NAME
     };
   },
 });

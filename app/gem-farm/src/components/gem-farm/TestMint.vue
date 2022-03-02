@@ -1,7 +1,7 @@
 <template>
   <div class="nes-container with-title">
     <p class="title">Create Test Reward Mint</p>
-    <button class="nes-btn is-primary" @click="createTestReward">
+    <button class="is-primary primary" @click="createTestReward">
       Create Test Mint
     </button>
     <div v-if="mint">
@@ -15,19 +15,19 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import useWallet from '@/composables/wallet';
+import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
-import { BrowserWallet } from '@gemworks/gem-farm-ts';
+import { BrowserWallet } from '../../../../../src';
 
 export default defineComponent({
   setup() {
-    const { getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { getConnection } = useCluster();
 
     const mint = ref<string>();
 
     const createTestReward = async () => {
-      const bw = new BrowserWallet(getConnection(), getWallet() as any);
+      const bw = new BrowserWallet(getConnection(), wallet.value as any);
 
       const { mint: rewardMint } = await bw.createMintAndFundATA(0, 1000000);
       mint.value = rewardMint.toBase58();

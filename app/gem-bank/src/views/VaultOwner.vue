@@ -1,6 +1,7 @@
 <template>
-  <ConfigPane />
-  <div v-if="!wallet" class="text-center">Pls connect (burner) wallet</div>
+  <div v-if="!wallet" class="text-center">
+    <ConfigPane />
+  </div>
   <div v-else>
     <!--bank address-->
     <div class="nes-container with-title mb-10">
@@ -23,7 +24,7 @@
           class="nes-btn is-primary mx-5"
           @click="moveNFTsOnChain"
         >
-          Move Gems!
+          Move to Vault
         </button>
       </div>
 
@@ -38,8 +39,8 @@
         />
         <!--mid-->
         <div class="m-2 flex flex-col">
-          <ArrowButton class="my-2" @click="moveNFTsFE(false)" />
-          <ArrowButton class="my-2" :left="true" @click="moveNFTsFE(true)" />
+          <button @click="moveNFTsFE(false)">Add to Vault</button>
+          <button @click="moveNFTsFE(true)">Remove from Vault</button>
         </div>
         <!--right-->
         <NFTGrid
@@ -82,7 +83,7 @@ import { PublicKey } from '@solana/web3.js';
 import { getListDiffBasedOnMints, removeManyFromList } from '@/common/util';
 import { BN } from '@project-serum/anchor';
 import TheWhitelist from '@/components/TheWhitelist.vue';
-import { findVaultPDA } from '@gemworks/gem-farm-ts';
+import { findVaultPDA } from '../../../../src';
 
 export default defineComponent({
   components: { TheWhitelist, ArrowButton, NFTGrid, ConfigPane },

@@ -6,7 +6,7 @@
   >
     <img
       :src="nft.externalMetadata.image"
-      :alt="nft.onchainMetadata.data.name"
+      :alt="(nft.onchainMetadata as any).data.name"
     />
   </div>
 </template>

@@ -1,21 +1,18 @@
 <template>
-  <div class="nes-container with-title">
-    <p class="title">{{ title }}</p>
-    <div class="mb-2">Accrued reward: {{ reward.accruedReward }}</div>
-    <div class="mb-2">Paid out reward: {{ reward.paidOutReward }}</div>
-    <div v-if="parseRewardType(farmReward) === 'variable'">
-      <div class="mb-2 w-full bg-black text-white">Variable reward:</div>
-      <div class="mb-2">
-        Last recorded accrued reward per gem:
+    <table v-if="parseRewardType(farmReward) === 'variable'">
+      <tr>
+        <td class="w-1/2 pr-4">Reward Pool</td>
+        <td>
         {{
           numeral(
             reward.variableRate.lastRecordedAccruedRewardPerRarityPoint.n / 10 ** 15
-          ).format('0,0.0')
-        }}
-      </div>
-    </div>
+          ).format('0,0')
+        }} ${{SPL_TOKEN_NAME}}
+        </td>
+      </tr>
+    </table>
     <div v-else>
-      <div class="mb-2 w-full bg-black text-white">Fixed reward:</div>
+      <!-- <div class="mb-2 w-full bg-black text-white">Fixed reward:</div>
       <div class="mb-2">
         Staking begins: {{ parseDate(reward.fixedRate.beginStakingTs) }}
       </div>
@@ -28,20 +25,22 @@
       <div class="mb-2">
         Promised duration: {{ reward.fixedRate.promisedDuration }}
       </div>
-      <div class="mb-2">Promised schedule:</div>
+      <div class="mb-2">Promised schedule:</div> -->
       <FixedScheduleDisplay
         :key="farmReward"
-        class="ml-5"
-        :schedule="reward.fixedRate.promisedSchedule"
+        :schedule="farmReward.fixedRate.schedule"
+        :farmAcc="farmAcc"
+        :isFrontend="true"
+        :eventIsActive="eventIsActive"
       />
     </div>
-  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import FixedScheduleDisplay from '@/components/gem-farm/FixedScheduleDisplay.vue';
 import { parseDate } from '@/common/util';
+import { SPL_TOKEN_NAME } from '../../../../../src'
 import numeral from 'numeral';
 
 export default defineComponent({
@@ -50,9 +49,12 @@ export default defineComponent({
     reward: Object,
     farmReward: Object,
     title: String,
+    farmAcc: Object,
+    eventIsActive: Boolean
   },
   setup() {
     const parseRewardType = (reward: any): string => {
+      console.log("reward: ", reward);
       //returns "variable" or "fixed"
       return Object.keys(reward.rewardType)[0];
     };
@@ -61,6 +63,7 @@ export default defineComponent({
       parseRewardType,
       parseDate,
       numeral,
+      SPL_TOKEN_NAME
     };
   },
 });

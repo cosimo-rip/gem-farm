@@ -12,19 +12,21 @@
     "update:anchor": "yarn upgrade @project-serum/anchor --latest --check-files"
   },
   "dependencies": {
-    "@gemworks/gem-farm-ts": "^0.22.7",
-    "@metaplex/js": "^4.9.0",
+    "@gemworks/gem-farm-ts": "^0.22.8",
+    "@metaplex/js": "^4.11.5",
     "@project-serum/anchor": "0.22.0",
     "@solana/spl-token": "^0.1.8",
-    "@solana/wallet-adapter-base": "^0.7.1",
-    "@solana/wallet-adapter-wallets": "^0.11.3",
+    "@solana/wallet-adapter-base": "^0.9.2",
+    "@solana/wallet-adapter-wallets": "^0.14.2",
     "@solana/web3.js": "^1.31.0",
     "axios": "^0.24.0",
     "core-js": "^3.6.5",
     "moment": "^2.29.1",
     "numeral": "^2.0.6",
-    "vue": "^3.0.0",
-    "vue-router": "^4.0.0-0"
+    "solana-wallets-vue": "^0.3.1",
+    "vue": "^3.2.31",
+    "vue-router": "^4.0.0-0",
+    "vue-toast-notification": "^3.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",

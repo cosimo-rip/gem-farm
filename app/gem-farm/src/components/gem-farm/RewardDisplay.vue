@@ -34,7 +34,13 @@
     <div v-else>
       <div class="mb-2">
         Reserved amount: {{ reward.fixedRate.reservedAmount }}
-        <FixedScheduleDisplay :schedule="reward.fixedRate.schedule" />
+        <FixedScheduleDisplay
+        :key="reward"
+        :schedule="reward.fixedRate.schedule"
+        :farmAcc="farmAcc"
+        :isFrontend="false"
+        :eventIsActive="eventIsActive"
+      />
       </div>
     </div>
 
@@ -65,6 +71,8 @@ export default defineComponent({
   props: {
     reward: Object,
     title: String,
+    farmAcc: Object,
+    eventIsActive: Boolean
   },
   setup() {
     // todo ideally should be using one from client, but n/a during render

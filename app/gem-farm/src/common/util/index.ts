@@ -1,6 +1,6 @@
 import moment from 'moment/moment';
 import { BN } from '@project-serum/anchor';
-import { toBN } from '@gemworks/gem-farm-ts';
+import { toBN } from '../../../../../src';
 
 export function removeManyFromList(toRemove: any[], fromList: any[]) {
   toRemove.forEach((i) => {
@@ -32,5 +32,5 @@ export function parseDate(unixTsSec: number | string | BN) {
   }
 
   const dateObj = new Date(unixBN.mul(new BN(1000)).toNumber());
-  return moment(dateObj).format('MMM Do YY, h:mm a');
+  return moment(dateObj).format('MMM Do YYYY, h:mm a');
 }

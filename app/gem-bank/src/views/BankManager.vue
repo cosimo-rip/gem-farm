@@ -1,6 +1,7 @@
 <template>
-  <ConfigPane />
-  <div v-if="!wallet" class="text-center">Pls connect (burner) wallet</div>
+  <div v-if="!wallet" class="text-center">
+    <ConfigPane />
+  </div>
   <div v-else>
     <!--if a bank exists-->
     <div v-if="bank">
@@ -32,7 +33,7 @@ import TheWhitelist from '@/components/TheWhitelist.vue';
 import ConfigPane from '@/components/ConfigPane.vue';
 import { initGemBank } from '@/common/gem-bank';
 import BankDetails from '@/components/BankDetails.vue';
-import { stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
+import { stringifyPKsAndBNs } from '../../../../src';
 import ManageVaults from '@/components/ManageVaults.vue';
 
 export default defineComponent({

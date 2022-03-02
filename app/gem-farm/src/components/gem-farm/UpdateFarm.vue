@@ -34,14 +34,14 @@
           v-model="unstakingFeeLamp"
         />
       </div>
-      <button class="nes-btn is-primary mb-5" type="submit">Update farm</button>
+      <button class="is-primary primary" type="submit">Update farm</button>
     </form>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import useWallet from '../../composables/wallet';
+import { useWallet } from 'solana-wallets-vue'
 import useCluster from '../../composables/cluster';
 import { initGemFarm } from '../../common/gem-farm';
 import { PublicKey } from '@solana/web3.js';
@@ -53,18 +53,18 @@ export default defineComponent({
   },
   emits: ['update-farm'],
   setup(props, ctx) {
-    const { wallet, getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
     watch([wallet, cluster], async () => {
-      gf = await initGemFarm(getConnection(), getWallet()!);
+      gf = await initGemFarm(getConnection(), wallet.value as any);
     });
 
     //needed coz mounts later
     onMounted(async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
       }
     });
 

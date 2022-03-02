@@ -1,76 +1,102 @@
 <template>
-  <ConfigPane />
-  <div v-if="!wallet" class="text-center">Pls connect (burner) wallet</div>
-  <div v-else>
-    <div class="flex mb-10 w-full justify-center">
-      <button
-        class="nes-btn is-primary mr-5"
-        @click="showNewFarm = !showNewFarm"
-      >
-        New farm
-      </button>
-      <button class="nes-btn" @click="refreshFarms">Refetch farms</button>
+  <div>
+    <h1 class="mb-4">{{PAGE_TITLE}} MGMT</h1>
+    
+    <div v-if="wallet" class="absolute top-8 right-8">
+      <ConfigPane />
     </div>
 
-    <!--new farm-->
-    <div v-if="showNewFarm">
-      <TestMint class="mb-10" />
-      <InitFarm class="mb-10" @new-farm="handleNewFarm" />
-    </div>
+    <div v-if="!wallet" class="text-center h-full bg-gray-200 flex" style="min-height: calc(100vh - 150px)">
+      <div class="m-auto">
+        <div class="text-center mb-5">Connect your wallet to begin</div>
 
-    <!--existing farms-->
-    <div v-if="foundFarms && foundFarms.length">
-      <!--farm selector-->
-      <div class="nes-container with-title mb-10">
-        <p class="title">Farm Details</p>
-        <p class="mb-2">Choose farm:</p>
-        <div class="nes-select mb-5">
-          <select v-model="farm">
-            <option v-for="f in foundFarms" :key="f.publicKey.toBase58()">
-              {{ f.publicKey.toBase58() }}
-            </option>
-          </select>
+        <div class="text-center mx-auto inline-block">
+          <ConfigPane />
         </div>
-        <FarmDisplay :key="farmAcc" :farmAcc="farmAcc" />
       </div>
-      <!--update farm-->
-      <UpdateFarm :farm="farm" @update-farm="handleUpdateFarm" class="mb-10" />
-      <!--manage NFT types-->
-      <TheWhitelist
-        :key="farmAcc.bank"
-        :farm="farm"
-        :bank="farmAcc.bank.toBase58()"
-        class="mb-10"
-      />
-      <!--manage funders-->
-      <AuthorizeFunder :key="farm" :farm="farm" class="mb-10" />
-      <!--manage funding-->
-      <FundCancelLock
-        :farm="farm"
-        :farmAcc="farmAcc"
-        class="mb-10"
-        @update-farm="handleUpdateFarm"
-      />
-      <!--refresh farmer-->
-      <RefreshFarmer :farm="farm" class="mb-10" />
-      <!--treasury payout-->
-      <TreasuryPayout :key="farmAcc" :farm="farm" class="mb-10" />
     </div>
-    <div v-else-if="isLoading" class="text-center">Loading...</div>
-    <div v-else class="text-center">No farms found :( Start a new one?</div>
+    <div v-else>
+      <div class="flex mb-10 w-full justify-center">
+        <button
+          class="is-primary mr-5 primary"
+          @click="showNewFarm = !showNewFarm"
+        >
+          New farm
+        </button>
+        <button class="primary" @click="refreshFarms">Refetch farms</button>
+      </div>
+
+      <!--new farm-->
+      <div v-if="showNewFarm">
+        <TestMint class="mb-10" />
+        <InitFarm class="mb-10" @new-farm="handleNewFarm" />
+      </div>
+
+      <!--existing farms-->
+      <div v-if="foundFarms && foundFarms.length">
+        <!--farm selector-->
+        <div class="mb-10 border-black border p-5">
+          <p class="title">Farm Details</p>
+          <p class="mb-2">Choose farm:</p>
+          <div class="mb-5">
+            <select v-model="farm">
+              <option v-for="f in foundFarms" :key="f.publicKey.toBase58()">
+                {{ f.publicKey.toBase58() }}
+              </option>
+            </select>
+          </div>
+          (Front-end uses: {{ACTIVE_FARM_ID}})<br /><br />
+          <FarmDisplay :key="farmAcc" :farmAcc="farmAcc" :eventIsActive="true" />
+        </div>
+        <!--update farm-->
+        <div class="mb-10 border-black border p-5">
+          <UpdateFarm :farm="farm" @update-farm="handleUpdateFarm" />
+        </div>
+        <!--manage NFT types-->
+        <div class="mb-10 border-black border p-5">
+        <TheWhitelist
+          :key="farmAcc.bank"
+          :farm="farm"
+          :bank="farmAcc.bank.toBase58()"
+        />
+        </div>
+        <!--manage funders-->
+        <div class="mb-10 border-black border p-5">
+        <AuthorizeFunder :key="farm" :farm="farm" />
+        </div>
+        <!--manage funding-->
+        <div class="mb-10 border-black border p-5">
+        <FundCancelLock
+          :farm="farm"
+          :farmAcc="farmAcc"
+          @update-farm="handleUpdateFarm"
+        />
+        </div>
+        <!--refresh farmer-->
+        <!-- <div class="mb-10 border-black border p-5">
+        <RefreshFarmer :farm="farm" class="mb-10" />
+        </div> -->
+        <!--treasury payout-->
+        <div class="mb-10 border-black border p-5">
+        <TreasuryPayout :key="farmAcc" :farm="farm" />
+        </div>
+      </div>
+      <div v-else-if="isLoading" class="text-center">Loading...</div>
+      <div v-else class="text-center">No farms found :( Start a new one?</div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
 import ConfigPane from '@/components/ConfigPane.vue';
-import useWallet from '@/composables/wallet';
+import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
 import TestMint from '@/components/gem-farm/TestMint.vue';
 import { initGemFarm } from '@/common/gem-farm';
 import InitFarm from '@/components/gem-farm/InitFarm.vue';
 import { PublicKey } from '@solana/web3.js';
-import { stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
+import { stringifyPKsAndBNs, PAGE_TITLE, ACTIVE_FARM_ID } from '../../../../src';
 import AuthorizeFunder from '@/components/gem-farm/AuthorizeFunder.vue';
 import FundCancelLock from '@/components/gem-farm/FundCancelLock.vue';
 import RefreshFarmer from '@/components/gem-farm/RefreshFarmer.vue';
@@ -90,23 +116,23 @@ export default defineComponent({
     AuthorizeFunder,
     InitFarm,
     TestMint,
-    ConfigPane,
+    ConfigPane
   },
   setup() {
-    const { wallet, getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
     watch([wallet, cluster], async () => {
-      gf = await initGemFarm(getConnection(), getWallet()!);
-      await findFarmsByManager(getWallet()!.publicKey!);
+      gf = await initGemFarm(getConnection(), wallet.value as any);
+      await findFarmsByManager(wallet.value!.publicKey!);
     });
 
     //needed in case we switch in from another window
     onMounted(async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
-        await findFarmsByManager(getWallet()!.publicKey!);
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
+        await findFarmsByManager(wallet.value!.publicKey!);
       }
     });
 
@@ -148,16 +174,16 @@ export default defineComponent({
 
     const handleNewFarm = async (newFarm: string) => {
       showNewFarm.value = false;
-      await findFarmsByManager(getWallet()!.publicKey!);
+      await findFarmsByManager(wallet.value!.publicKey!);
       farm.value = newFarm;
     };
 
     const handleUpdateFarm = async () => {
-      await findFarmsByManager(getWallet()!.publicKey!);
+      await findFarmsByManager(wallet.value!.publicKey!);
     };
 
     const refreshFarms = async () => {
-      await findFarmsByManager(getWallet()!.publicKey!);
+      await findFarmsByManager(wallet.value!.publicKey!);
     };
 
     return {
@@ -170,6 +196,8 @@ export default defineComponent({
       handleUpdateFarm,
       showNewFarm,
       refreshFarms,
+      PAGE_TITLE,
+      ACTIVE_FARM_ID
     };
   },
 });

@@ -15,7 +15,7 @@
   <!--participating farmers/gems-->
   <div class="mb-2">Initialized farmer count: {{ farmAcc.farmerCount }}</div>
   <div class="mb-2">Staked farmer count: {{ farmAcc.stakedFarmerCount }}</div>
-  <div class="mb-5">Gems staked: {{ farmAcc.gemsStaked }}</div>
+  <div class="mb-5">{{NFT_SHORT_NAME}} staked: {{ farmAcc.gemsStaked }}</div>
 
   <div class="flex">
     <!--reward A-->
@@ -23,6 +23,8 @@
       <RewardDisplay
         :key="farmAcc.rewardA"
         :reward="farmAcc.rewardA"
+        :farmAcc="farmAcc"
+        :eventIsActive="eventIsActive"
         title="Reward A"
       />
     </div>
@@ -31,6 +33,8 @@
       <RewardDisplay
         :key="farmAcc.rewardB"
         :reward="farmAcc.rewardB"
+        :farmAcc="farmAcc"
+        :eventIsActive="eventIsActive"
         title="Reward B"
       />
     </div>
@@ -40,13 +44,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import RewardDisplay from '@/components/gem-farm/RewardDisplay.vue';
+import { NFT_SHORT_NAME } from '../../../../../src'
 export default defineComponent({
   components: { RewardDisplay },
   props: {
     farmAcc: Object,
+    eventIsActive: Boolean
   },
   setup() {
-    return {};
+    return {
+      NFT_SHORT_NAME
+    };
   },
 });
 </script>

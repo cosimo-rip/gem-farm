@@ -17,36 +17,36 @@
         <label for="lamports">Amount to pay out (lamp):</label>
         <input id="lamports" type="text" v-model="lamports" class="nes-input" />
       </div>
-      <button class="mb-5 nes-btn is-primary" type="submit">Payout</button>
+      <button class="is-primary primary" type="submit">Payout</button>
     </form>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import useWallet from '@/composables/wallet';
+import { useWallet } from 'solana-wallets-vue';
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
 import { PublicKey } from '@solana/web3.js';
-import { findFarmTreasuryPDA } from '@gemworks/gem-farm-ts';
+import { findFarmTreasuryPDA } from '../../../../../src';
 
 export default defineComponent({
   props: {
     farm: String,
   },
   setup(props, ctx) {
-    const { wallet, getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
     watch([wallet, cluster], async () => {
-      gf = await initGemFarm(getConnection(), getWallet()!);
+      gf = await initGemFarm(getConnection(), wallet.value as any);
     });
 
     //need an onmounted hook because this component isn't yet mounted when wallet/cluster are set
     onMounted(async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
         await getTresauryBalance();
       }
     });

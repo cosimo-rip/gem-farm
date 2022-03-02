@@ -38,7 +38,7 @@
       </div>
 
       <div class="mt-2">
-        <button class="nes-btn is-primary">Update</button>
+        <button class="is-primary primary">Update</button>
       </div>
     </form>
 
@@ -53,9 +53,9 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import { WhitelistType } from '@gemworks/gem-farm-ts';
+import { WhitelistType } from '../../../../../src';
 import useCluster from '@/composables/cluster';
-import useWallet from '@/composables/wallet';
+import { useWallet } from 'solana-wallets-vue'
 import { PublicKey } from '@solana/web3.js';
 import { initGemFarm } from '@/common/gem-farm';
 
@@ -65,18 +65,18 @@ export default defineComponent({
     bank: { type: String, required: true },
   },
   setup(props, ctx) {
-    const { wallet, getWallet } = useWallet();
+    const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
     watch([wallet, cluster], async () => {
-      gf = await initGemFarm(getConnection(), getWallet()!);
+      gf = await initGemFarm(getConnection(), wallet.value as any);
     });
 
     //need an onmounted hook because this component isn't yet mounted when wallet/cluster are set
     onMounted(async () => {
-      if (getWallet() && getConnection()) {
-        gf = await initGemFarm(getConnection(), getWallet()!);
+      if (wallet && getConnection()) {
+        gf = await initGemFarm(getConnection(), wallet.value as any);
       }
       await fetchProofs();
     });

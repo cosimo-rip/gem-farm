@@ -1,5 +1,5 @@
 <template>
-  <button :disabled="disabled">
+  <button class="primary" :disabled="disabled">
     <img
       src="../assets/play.png"
       alt="right"

@@ -1,14 +1,20 @@
 <template>
-  <div
-    class="m-1 card flex justify-center"
+<div class="bg-white px-2 py-2 m-1 rounded-xl card cursor-pointer"
     :class="{ 'card-selected': selected }"
-    @click="toggleSelect"
+    @click="toggleSelect">
+  <div
+    class="flex justify-center h-4/5"
   >
     <img
+    class="mt-2"
       :src="nft.externalMetadata.image"
-      :alt="nft.onchainMetadata.data.name"
+      :alt="(nft.onchainMetadata as any).data.name"
     />
   </div>
+    <div class="text-xs text-center h-1/5 truncate mt-2">
+    {{nft.externalMetadata.name}}
+    </div>
+    </div>
 </template>
 
 <script lang="ts">
@@ -47,16 +53,17 @@ img {
 }
 
 .card {
-  width: 150px;
-  height: 150px;
+  @apply border-2 border-solid border-transparent;
+  width: 180px;
+  height: 180px;
 }
 
 .card:hover {
-  @apply border-4 border-solid border-gray-200;
+  @apply border-2 border-solid border-gray-200;
 }
 
 .card-selected {
-  @apply border-4 border-solid;
+  @apply border-2 border-solid;
   border-color: black !important;
 }
 </style>
