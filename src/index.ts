@@ -5,16 +5,16 @@ export * from './gem-farm';
 export * from './gem-common';
 
 export const GEM_BANK_PROG_ID = new PublicKey(
-  'GYNSEV4TSs4ThHkj7e6AhTKRMsRmSZSJspub8Yy5KjHX'
+  'bankHHdqMuaaST4qQk6mkzxGeKPHWmqdgor6Gs8r88m'
 );
 export const GEM_FARM_PROG_ID = new PublicKey(
-  '4FACvuyBqoAaZYapbyZvfCW8Dcj9pC4rbLWb5bmR34mg'
+  'farmL4xeBFVXJqtfxCzU9b28QACM7E2W2ctT6epAjvE'
 );
 export const WALLET_NFT_CREATOR_FILTER = new PublicKey(
   'Bhr9iWx7vAZ4JDD5DVSdHxQLqG9RvCLCSXvu6yC4TF6c'
 );
 
-export const ACTIVE_FARM_ID = 'As7aTouXTpZ9tAxzHcF8MvDFqTKmJrbwsaaeCmyr2rwF';
+export const ACTIVE_FARM_ID = 'EcikR7zeJXpTFH6kAhGr8qvF1NKWZsK25u7fmbjDcinA';
 
 export const PAGE_TITLE = 'SKULL STAKING';
 export const NFT_SHORT_NAME = 'SKULLS';
