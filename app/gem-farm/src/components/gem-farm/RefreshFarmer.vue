@@ -33,7 +33,7 @@ export default defineComponent({
 
     //need an onmounted hook because this component isn't yet mounted when wallet/cluster are set
     onMounted(async () => {
-      if (wallet && getConnection()) {
+      if (wallet.value && getConnection()) {
         gf = await initGemFarm(getConnection(), wallet.value as any);
       }
     });

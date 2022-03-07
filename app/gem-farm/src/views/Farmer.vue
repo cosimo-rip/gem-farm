@@ -187,7 +187,7 @@ export default defineComponent({
     };
 
     const freshStart = async () => {
-      if (wallet && getConnection()) {
+      if (wallet.value && getConnection()) {
         gf = await initGemFarm(getConnection(), wallet.value as any);
         farmerIdentity.value = wallet.value!.publicKey?.toBase58();
 
