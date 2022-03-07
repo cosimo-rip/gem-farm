@@ -147,10 +147,14 @@ export default defineComponent({
           getConnection()
         )
         console.log("wallet nfts: ", allWalletNFTs);
-        currentWalletNFTs.value = allWalletNFTs.filter((nft: INFT) => 
-            (nft.onchainMetadata as any).data.creators.length > 0 &&
-            (nft.onchainMetadata as any).data.creators[0].address == WALLET_NFT_CREATOR_FILTER.toString()
+        const filteredNFTs = allWalletNFTs.filter((nft: INFT) => 
+            (nft.onchainMetadata as any).data
+            && (nft.onchainMetadata as any).data.creators
+            && (nft.onchainMetadata as any).data.creators.length > 0 
+            && (nft.onchainMetadata as any).data.creators[0].address == WALLET_NFT_CREATOR_FILTER.toString()
         )
+        console.log("filtered nfts: ", filteredNFTs);
+        currentWalletNFTs.value = filteredNFTs
         desiredWalletNFTs.value = [...currentWalletNFTs.value];
       }
     };
