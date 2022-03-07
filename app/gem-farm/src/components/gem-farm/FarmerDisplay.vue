@@ -90,7 +90,7 @@ export default defineComponent({
         gf = await initGemFarm(getConnection(), wallet.value as any);
       }
 
-      const meRes = (await axios.get('http://localhost:8081/magic-eden')).data
+      const meRes = (await axios.get('https://api-dot-treat-toolbox.uc.r.appspot.com/magic-eden')).data
       const solPriceRes = (await axios.get('https://data.messari.io/api/v1/assets/solana/metrics')).data
       magicEdenFloor.value = meRes.floorPrice/1000000000
       solPrice.value = solPriceRes.data.market_data.price_usd
