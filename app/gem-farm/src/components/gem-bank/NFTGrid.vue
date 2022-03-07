@@ -9,6 +9,7 @@
           v-for="nft in nfts"
           :key="nft"
           :nft="nft"
+          :disabled="disabled"
           @selected="handleSelected"
         />
       </div>
@@ -30,12 +31,17 @@ export default defineComponent({
     title: String,
     emptyMessage: String,
     nfts: Array,
+    disabled: Boolean
   },
   setup(props, ctx) {
     const handleSelected = (e: any) => {
+      if (props.disabled) {
+        return;
+      }
       ctx.emit('selected', e);
     };
     return {
+      disabled: props.disabled,
       handleSelected,
     };
   },

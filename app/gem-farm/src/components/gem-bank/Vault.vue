@@ -22,6 +22,7 @@
       :emptyMessage="'Your ' + VAULT_NAME.toLowerCase() + ' is empty'"
       class="mb-4 relative"
       :nfts="desiredVaultNFTs"
+      :disabled="vaultLocked"
       @selected="handleVaultNFTSelected"
     >
       <div
@@ -76,6 +77,7 @@
       :emptyMessage="'Your wallet contains no ' + NFT_SHORT_NAME"
       class="flex-1"
       :nfts="desiredWalletNFTs"
+      :disabled="false"
       @selected="handleWalletNFTSelected"
     />
   </div>
@@ -393,12 +395,16 @@ export default defineComponent({
 <style scoped>
 .locked {
   @apply text-center bg-black text-white;
-  width: 100%;
-  height: 100%;
   position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0.5;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.65;
   z-index: 10;
+  padding: 10px 15px;
+  border-radius: 30px;
+}
+.locked p {
+  margin-top: 0;
 }
 </style>

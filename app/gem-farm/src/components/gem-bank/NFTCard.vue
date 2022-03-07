@@ -1,6 +1,6 @@
 <template>
 <div class="bg-white px-2 py-2 m-1 rounded-xl card cursor-pointer"
-    :class="{ 'card-selected': selected }"
+    :class="{ 'card-selected': selected, 'card-disabled': disabled }"
     @click="toggleSelect">
   <div
     class="flex justify-center h-4/5"
@@ -22,12 +22,16 @@ import { defineComponent, ref } from 'vue';
 export default defineComponent({
   props: {
     nft: { type: Object, required: true },
+    disabled: Boolean
   },
   emits: ['selected'],
   setup(props, ctx) {
     const selected = ref<boolean>(false);
 
     const toggleSelect = () => {
+      if (props.disabled) {
+        return;
+      }
       selected.value = !selected.value;
       console.log('selected', props.nft.mint.toBase58());
       ctx.emit('selected', {
@@ -38,6 +42,7 @@ export default defineComponent({
 
     return {
       selected,
+      disabled: props.disabled,
       toggleSelect,
     };
   },
@@ -66,4 +71,13 @@ img {
   @apply border-2 border-solid;
   border-color: black !important;
 }
+
+.card-disabled {
+  @apply border-none opacity-50 cursor-not-allowed;
+}
+
+.card-disabled:hover {
+  @apply border-none cursor-not-allowed;
+}
+
 </style>
