@@ -185,7 +185,6 @@ export default defineComponent({
           mints,
           getConnection()
         );
-        console.log("vault nfts:", vaultNFTs);
         const sortedVaultNFTs = vaultNFTs.sort((nftA: INFT, nftB: INFT) => { 
           const nameA = (nftA.externalMetadata as any).name;
           const nameB = (nftB.externalMetadata as any).name;
