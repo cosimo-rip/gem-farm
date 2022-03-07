@@ -56,6 +56,9 @@
             <div v-if="fetchingFarmFailed">
               Connection Issues. Please reload and try again.
             </div>
+            <div v-else-if="loading">
+              Loading...
+            </div>
             <div v-else>
               <div class="w-full text-center mb-5">
                 Before you can {{STAKE_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}, you'll need a {{VAULT_NAME.toLowerCase()}}.
@@ -99,17 +102,23 @@ export default defineComponent({
   },
 
   setup() {
-    const { wallet } = useWallet();
+    const { wallet, connecting, connected } = useWallet();
     const { cluster, getConnection } = useCluster();
 
     let gf: any;
-    watch([wallet, cluster], async () => {
-      await freshStart();
+    watch([wallet, connected, cluster], async () => {
+      if (wallet.value && getConnection()) {
+        console.log("wallet updated with wallet and connection")
+        await freshStart(wallet.value, getConnection());
+      }
     });
 
     //needed in case we switch in from another window
     onMounted(async () => {
-      await freshStart();
+      if (wallet.value && wallet.value.publicKey && getConnection()) {
+        console.log("mounted with wallet and connection")
+        await freshStart(wallet.value, getConnection());
+      }
     });
 
     // --------------------------------------- farmer details
@@ -124,6 +133,8 @@ export default defineComponent({
     const availableB = ref<string>();
 
     const fetchingFarmFailed = ref<boolean>(false);
+
+    const loading = ref<boolean>(true);
 
     const updateAvailableRewards = async () => {
       availableA.value = farmerAcc.value.rewardA.accruedReward
@@ -142,12 +153,13 @@ export default defineComponent({
       );
     };
 
-    const fetchFarmer = async () => {
+    const fetchFarmer = async (wallet: any) => {
+      console.log("fetching farmer wallet:", wallet);
       const [farmerPDA] = await findFarmerPDA(
         new PublicKey(farm.value!),
-        wallet.value!.publicKey!
+        wallet.publicKey!
       );
-      farmerIdentity.value = wallet.value!.publicKey?.toBase58();
+      farmerIdentity.value = wallet.publicKey?.toBase58();
       farmerAcc.value = await gf.fetchFarmerAcc(farmerPDA);
       farmerState.value = gf.parseFarmerState(farmerAcc.value);
       await updateAvailableRewards();
@@ -157,34 +169,40 @@ export default defineComponent({
       );
     };
 
-    const freshStart = async () => {
-      if (wallet.value && getConnection()) {
-        gf = await initGemFarm(getConnection(), wallet.value as any);
-        farmerIdentity.value = wallet.value!.publicKey?.toBase58();
+    const freshStart = async (wallet: any, connection: any) => {
 
-        //reset stuff
-        farmAcc.value = undefined;
-        farmerAcc.value = undefined;
-        farmerState.value = undefined;
-        availableA.value = undefined;
-        availableB.value = undefined;
+      gf = await initGemFarm(connection, wallet);
+      farmerIdentity.value = wallet.publicKey?.toBase58();
 
-        try {
-          await fetchFarn();
-          await fetchFarmer();
-          fetchingFarmFailed.value = false;
-        } catch (e) {
-          console.log(`farm with PK ${farm.value} not found :(`);
-          console.log(e);
-          fetchingFarmFailed.value = true;
-        }
+      //reset stuff
+      farmAcc.value = undefined;
+      farmerAcc.value = undefined;
+      farmerState.value = undefined;
+      availableA.value = undefined;
+      availableB.value = undefined;
+
+      try {
+        await fetchFarn();
+        fetchingFarmFailed.value = false;
+      } catch (e) {
+        console.log(`farm failed to load`);
+        console.log(e);
+        fetchingFarmFailed.value = true;
       }
+
+      try {
+        await fetchFarmer(wallet);
+      } catch (e) {
+        console.log(`no farmer found with public key: ${wallet.publicKey}`);
+      }
+
+      loading.value = false;
     };
 
     const initFarmer = async () => {
       try {
         await gf.initFarmerWallet(new PublicKey(farm.value));
-        await fetchFarmer();
+        await fetchFarmer(wallet.value as any);
       } catch (error) {
         App.$toast.open("Failed to create " + VAULT_NAME + ".");
       }
@@ -194,7 +212,7 @@ export default defineComponent({
     const beginStaking = async () => {
       try {
         await gf.stakeWallet(new PublicKey(farm.value));
-        await fetchFarmer();
+        await fetchFarmer(wallet.value as any);
       } catch (error) {
 
         App.$toast.open("Staking Failed");
@@ -204,7 +222,7 @@ export default defineComponent({
     const endStaking = async () => {
       try {
         await gf.unstakeWallet(new PublicKey(farm.value!));
-        await fetchFarmer();
+        await fetchFarmer(wallet.value as any);
       } catch (error) {
         console.log("end staking failed")
         App.$toast.open("End Staking Failed.");
@@ -217,12 +235,14 @@ export default defineComponent({
         new PublicKey(farmAcc.value.rewardA.rewardMint!),
         new PublicKey(farmAcc.value.rewardB.rewardMint!)
       );
-      await fetchFarmer();
+      await fetchFarmer(wallet.value as any);
     };
 
     return {
       currentTS: Date.now(),
       wallet,
+      connecting,
+      loading,
       farm,
       farmAcc,
       farmer: farmerIdentity,
