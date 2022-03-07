@@ -32,7 +32,6 @@
             :farmAcc="farmAcc"
             :farmer="farmer"
             :farmerAcc="farmerAcc"
-            @refresh-farmer="handleRefreshFarmer"
           />
           <Vault
             :key="farmerAcc"
@@ -43,7 +42,9 @@
             :farmerAcc="farmerAcc"
             :cooldownEndsTs="farmerAcc.cooldownEndsTs"
             :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
-            @selected-wallet-nft="handleNewSelectedNFT"
+            @begin-staking="beginStaking"
+            @end-staking="endStaking"
+            @claim-rewards="claimRewards"
           />
         </div>
 
@@ -73,7 +74,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
@@ -82,7 +83,6 @@ import ConfigPane from '@/components/ConfigPane.vue';
 import FarmerDisplay from '@/components/gem-farm/FarmerDisplay.vue';
 import FarmerRewardDisplay from '@/components/gem-farm/FarmerRewardDisplay.vue'
 import Vault from '@/components/gem-bank/Vault.vue';
-import { INFT } from '@/common/web3/NFTget';
 import { findFarmerPDA, stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
 import { PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID } from '@/common/config';
 import App from '../App.vue'
@@ -186,7 +186,6 @@ export default defineComponent({
         await gf.initFarmerWallet(new PublicKey(farm.value));
         await fetchFarmer();
       } catch (error) {
-
         App.$toast.open("Failed to create " + VAULT_NAME + ".");
       }
     };
@@ -196,7 +195,6 @@ export default defineComponent({
       try {
         await gf.stakeWallet(new PublicKey(farm.value));
         await fetchFarmer();
-        selectedNFTs.value = [];
       } catch (error) {
 
         App.$toast.open("Staking Failed");
@@ -207,14 +205,13 @@ export default defineComponent({
       try {
         await gf.unstakeWallet(new PublicKey(farm.value!));
         await fetchFarmer();
-        selectedNFTs.value = [];
       } catch (error) {
         console.log("end staking failed")
         App.$toast.open("End Staking Failed.");
       }
     };
 
-    const claim = async () => {
+    const claimRewards = async () => {
       await gf.claimWallet(
         new PublicKey(farm.value!),
         new PublicKey(farmAcc.value.rewardA.rewardMint!),
@@ -222,50 +219,6 @@ export default defineComponent({
       );
       await fetchFarmer();
     };
-
-    const handleRefreshFarmer = async () => {
-      await fetchFarmer();
-    };
-
-    // --------------------------------------- adding extra gem
-    const selectedNFTs = ref<INFT[]>([]);
-
-    const handleNewSelectedNFT = (newSelectedNFTs: INFT[]) => {
-      console.log(`selected ${newSelectedNFTs.length} NFTs`);
-      selectedNFTs.value = newSelectedNFTs;
-    };
-
-    // const addSingleGem = async (
-    //   gemMint: PublicKey,
-    //   gemSource: PublicKey,
-    //   creator: PublicKey
-    // ) => {
-    //   await gf.flashDepositWallet(
-    //     new PublicKey(farm),
-    //     '1',
-    //     gemMint,
-    //     gemSource,
-    //     creator
-    //   );
-    //   await fetchFarmer();
-    // };
-
-    // const addGems = async () => {
-    //   await Promise.all(
-    //     selectedNFTs.value.map((nft) => {
-    //       const creator = new PublicKey(
-    //         //todo currently simply taking the 1st creator
-    //         (nft.onchainMetadata as any).data.creators[0].address
-    //       );
-    //       console.log('creator is', creator.toBase58());
-
-    //       addSingleGem(nft.mint, nft.pubkey!, creator);
-    //     })
-    //   );
-    //   console.log(
-    //     `added another ${selectedNFTs.value.length} gems into staking vault`
-    //   );
-    // };
 
     return {
       currentTS: Date.now(),
@@ -280,10 +233,7 @@ export default defineComponent({
       initFarmer,
       beginStaking,
       endStaking,
-      claim,
-      handleRefreshFarmer,
-      selectedNFTs,
-      handleNewSelectedNFT,
+      claimRewards,
       fetchingFarmFailed,
       // addGems,
       PAGE_TITLE,

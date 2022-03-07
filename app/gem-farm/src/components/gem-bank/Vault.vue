@@ -3,31 +3,14 @@
     <!--control buttons-->
     <div class="mb-5 flex justify-center">
       <button
-        v-if="
-          (toWalletNFTs && toWalletNFTs.length) ||
-          (toVaultNFTs && toVaultNFTs.length)
-          "
-        class="is-primary mr-5 primary"
-        @click="moveNFTsOnChain"
-      >
-        Save Changes
-      </button>
-      <!-- <button
-        v-if="farmerState === 'staked' && selectedNFTs.length > 0"
-        class="is-primary mr-5 primary"
-        @click="addGems"
-      >
-        Add {{NFT_SHORT_NAME}}
-      </button> -->
-      <button
-        v-if="farmerState === 'unstaked' && farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000) && (!toWalletNFTs || !toWalletNFTs.length) && (!toVaultNFTs || !toVaultNFTs.length)"
+        v-if="farmerState === 'unstaked' && farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000) && currentVaultNFTs.length > 0"
         class="is-success mr-5 primary"
         @click="beginStaking"
       >
         {{STAKE_NAME}} {{NFT_SHORT_NAME}}
       </button>
       <button
-        v-if="farmerState === 'staked' && (!toWalletNFTs || !toWalletNFTs.length) && (!toVaultNFTs || !toVaultNFTs.length)"
+        v-if="farmerState === 'staked'"
         class="is-error mr-5 primary"
         @click="endStaking"
       >
@@ -40,7 +23,7 @@
       >
         Retrieve {{NFT_SHORT_NAME}}
       </button>
-      <button class="primary" v-if="farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0" @click="claim">
+      <button class="primary claim" @click="claimRewards" disabled="{{farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) < 1}}">
         Claim {{Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0 ? Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) : "")}} ${{SPL_TOKEN_NAME}}
       </button>
     </div>
@@ -51,7 +34,7 @@
       :title="VAULT_NAME"
       :emptyMessage="'Your ' + VAULT_NAME.toLowerCase() + ' is empty'"
       class="mb-4 relative"
-      :nfts="desiredVaultNFTs"
+      :nfts="currentVaultNFTs"
       :disabled="vaultLocked"
       @selected="handleVaultNFTSelected"
     >
@@ -75,7 +58,7 @@
 
     <!--mid-->
     <div class="mb-5 flex justify-center">
-      <button :disabled="vaultLocked" class="my-2 mr-2 inline-block primary" @click="moveNFTsToVault(true)">
+      <button :disabled="vaultLocked || currentWalletNFTs.length == 0" class="my-2 mr-2 inline-block primary" @click="moveNFTsToVault(true)">
         <span class="inline-block">Move All</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
@@ -93,7 +76,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
         </svg>
       </button> 
-      <button :disabled="vaultLocked" class="my-2 inline-block primary" :left="true" @click="moveNFTsBackToWallet(true)">
+      <button :disabled="vaultLocked || currentVaultNFTs.length == 0" class="my-2 inline-block primary" :left="true" @click="moveNFTsBackToWallet(true)">
         <span class="inline-block">Return All</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
@@ -103,13 +86,23 @@
 
     <!--Wallet-->
     <NFTGrid
+      v-if="bank && vault"
       title="Wallet"
       :emptyMessage="'Your wallet contains no ' + NFT_SHORT_NAME"
-      class="flex-1"
-      :nfts="desiredWalletNFTs"
-      :disabled="false"
+      class="relative"
+      :nfts="currentWalletNFTs"
+      :disabled="vaultLocked"
       @selected="handleWalletNFTSelected"
-    />
+    >
+      <div
+        v-if="vaultLocked && farmerState == 'staked'"
+        class="locked flex-col justify-center items-center align-center"
+      >
+        <p class="mt-5 text-indigo-200" style="text-shadow: 1px 1px 1px black">
+          <span>You must {{UNSTAKE_NAME.toLowerCase()}} your {{NFT_SHORT_NAME}} before you can {{STAKE_NAME.toLowerCase()}} more.</span>
+        </p>
+      </div>
+    </NFTGrid>
   </div>
 </template>
 
@@ -125,7 +118,6 @@ import {
 } from '@/common/web3/NFTget';
 import { initGemBank } from '@/common/gem-bank';
 import { PublicKey } from '@solana/web3.js';
-import { getListDiffBasedOnMints, removeManyFromList } from '@/common/util';
 import { BN } from '@project-serum/anchor';
 import { parseDate } from '@/common/util';
 import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, COOLING_DOWN_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME } from '@/common/config'
@@ -147,7 +139,7 @@ export default defineComponent({
     cooldownEndsTs: Object,
     eventIsActive: Boolean
   },
-  emits: ['selected-wallet-nft'],
+  emits: ['selected-wallet-nft', 'begin-staking', 'end-staking', 'claim-rewards'],
   setup(props, ctx) {
     const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
@@ -157,15 +149,10 @@ export default defineComponent({
     //current walet/vault state
     const currentWalletNFTs = ref<INFT[]>([]);
     const currentVaultNFTs = ref<INFT[]>([]);
+    
     //selected but not yet moved over in FE
     const selectedWalletNFTs = ref<INFT[]>([]);
     const selectedVaultNFTs = ref<INFT[]>([]);
-    //moved over in FE but not yet onchain
-    const desiredWalletNFTs = ref<INFT[]>([]);
-    const desiredVaultNFTs = ref<INFT[]>([]);
-    //moved over onchain
-    const toWalletNFTs = ref<INFT[]>([]);
-    const toVaultNFTs = ref<INFT[]>([]);
 
     // --------------------------------------- populate initial nfts
 
@@ -174,7 +161,6 @@ export default defineComponent({
       // zero out to begin with
       currentWalletNFTs.value = [];
       selectedWalletNFTs.value = [];
-      desiredWalletNFTs.value = [];
 
       if (wallet) {
         const allWalletNFTs = await getNFTsByOwner(
@@ -195,7 +181,6 @@ export default defineComponent({
           })
         console.log("filtered wallet nfts: ", filteredNFTs);
         currentWalletNFTs.value = filteredNFTs
-        desiredWalletNFTs.value = filteredNFTs
       }
     };
 
@@ -204,7 +189,6 @@ export default defineComponent({
       // zero out to begin with
       currentVaultNFTs.value = [];
       selectedVaultNFTs.value = [];
-      desiredVaultNFTs.value = [];
 
       const foundGDRs = await gb.fetchAllGdrPDAs(vault.value);
       if (foundGDRs && foundGDRs.length) {
@@ -224,7 +208,6 @@ export default defineComponent({
           return nameA.localeCompare(nameB)
         });
         currentVaultNFTs.value = sortedVaultNFTs
-        desiredVaultNFTs.value = sortedVaultNFTs;
         console.log("sorted vault NFTs", sortedVaultNFTs);
       }
     };
@@ -232,7 +215,6 @@ export default defineComponent({
     const updateVaultState = async () => {
       vaultAcc.value = await gb.fetchVaultAcc(vault.value);
       bank.value = vaultAcc.value.bank;
-      console.log(vaultAcc.value);
       vaultLocked.value = vaultAcc.value.locked;
     };
 
@@ -265,6 +247,18 @@ export default defineComponent({
       }
       ctx.emit('selected-wallet-nft', selectedWalletNFTs.value);
     };
+    
+    const beginStaking = (e: any) => {
+      ctx.emit('begin-staking');
+    }
+    
+    const endStaking = (e: any) => {
+      ctx.emit('end-staking');
+    }
+
+    const claimRewards = (e: any) => {
+      ctx.emit('claim-rewards');
+    }
 
     const handleVaultNFTSelected = (e: any) => {
       if (e.selected) {
@@ -277,17 +271,11 @@ export default defineComponent({
 
     const moveNFTsToVault = (all: boolean) => {
       if (all) {
-        //push all wallet nfts into desired vault
-        desiredVaultNFTs.value.push(...currentWalletNFTs.value);
-        desiredVaultNFTs.value.push(...desiredWalletNFTs.value);
-        //remove current wallet nfts from desired wallet
-        removeManyFromList(currentWalletNFTs.value, desiredWalletNFTs.value);
-        removeManyFromList(desiredVaultNFTs.value, desiredWalletNFTs.value);
+        //push all wallet nfts into vault
+        moveNFTsOnChain(currentWalletNFTs.value, []);
       } else {
-        //push selected wallet nfts into desired vault
-        desiredVaultNFTs.value.push(...selectedWalletNFTs.value);
-        //remove selected wallet nfts from desired wallet
-        removeManyFromList(selectedWalletNFTs.value, desiredWalletNFTs.value);
+        //push selected wallet nfts into vault
+        moveNFTsOnChain(selectedWalletNFTs.value, []);
       }
       //empty selected wallet
       selectedWalletNFTs.value = [];
@@ -295,25 +283,19 @@ export default defineComponent({
 
     const moveNFTsBackToWallet = (all: boolean) => {
       if (all) {
-        //push selected vault nfts into desired wallet
-        desiredWalletNFTs.value.push(...currentVaultNFTs.value);
-        desiredWalletNFTs.value.push(...desiredVaultNFTs.value);
-        //remove selected vault nfts from desired vault
-        removeManyFromList(currentVaultNFTs.value, desiredVaultNFTs.value);
-        removeManyFromList(desiredWalletNFTs.value, desiredVaultNFTs.value);
+        //push selected vault nfts into wallet
+        moveNFTsOnChain([], currentVaultNFTs.value);
       } else {
-        //push selected vault nfts into desired wallet
-        desiredWalletNFTs.value.push(...selectedVaultNFTs.value);
-        //remove selected vault nfts from desired vault
-        removeManyFromList(selectedVaultNFTs.value, desiredVaultNFTs.value);
+        //push selected vault nfts into wallet
+        moveNFTsOnChain([], selectedVaultNFTs.value);
       }
       //empty selection list
       selectedVaultNFTs.value = [];
     };
 
     //todo jam into single tx
-    const moveNFTsOnChain = async () => {
-      for (const nft of toVaultNFTs.value) {
+    const moveNFTsOnChain = async (toVaultNFTs: INFT[], toWalletNFTs: INFT[]) => {
+      for (const nft of toVaultNFTs) {
         console.log(nft);
         const creator = new PublicKey(
           //todo currently simply taking the 1st creator
@@ -322,37 +304,13 @@ export default defineComponent({
         console.log('creator is', creator.toBase58());
         await depositGem(nft.mint, creator, nft.pubkey!);
       }
-      for (const nft of toWalletNFTs.value) {
+      for (const nft of toWalletNFTs) {
         await withdrawGem(nft.mint);
       }
-      await Promise.all([populateWalletNFTs(), populateVaultNFTs()]);
+      setTimeout(async function() {
+        await Promise.all([populateWalletNFTs(), populateVaultNFTs()]);
+      }, 2000)
     };
-
-    //to vault = vault desired - vault current
-    watch(
-      desiredVaultNFTs,
-      () => {
-        toVaultNFTs.value = getListDiffBasedOnMints(
-          desiredVaultNFTs.value,
-          currentVaultNFTs.value
-        );
-        console.log('to vault nfts are', toVaultNFTs.value);
-      },
-      { deep: true }
-    );
-
-    //to wallet = wallet desired - wallet current
-    watch(
-      desiredWalletNFTs,
-      () => {
-        toWalletNFTs.value = getListDiffBasedOnMints(
-          desiredWalletNFTs.value,
-          currentWalletNFTs.value
-        );
-        console.log('to wallet nfts are', toWalletNFTs.value);
-      },
-      { deep: true }
-    );
 
     // --------------------------------------- gem bank
 
@@ -368,25 +326,33 @@ export default defineComponent({
       creator: PublicKey,
       source: PublicKey
     ) => {
-      const { txSig } = await gb.depositGemWallet(
-        bank.value,
-        vault.value,
-        new BN(1),
-        mint,
-        source,
-        creator
-      );
-      console.log('deposit done', txSig);
+      try {
+        const { txSig } = await gb.depositGemWallet(
+          bank.value,
+          vault.value,
+          new BN(1),
+          mint,
+          source,
+          creator
+        );
+        console.log('deposit done', txSig);
+      } catch (e) {
+        console.log("deposit failed");
+      }
     };
 
     const withdrawGem = async (mint: PublicKey) => {
-      const { txSig } = await gb.withdrawGemWallet(
-        bank.value,
-        vault.value,
-        new BN(1),
-        mint
-      );
-      console.log('withdrawal done', txSig);
+      try {
+        const { txSig } = await gb.withdrawGemWallet(
+          bank.value,
+          vault.value,
+          new BN(1),
+          mint
+        );
+        console.log('withdrawal done', txSig);
+      } catch (e) {
+        console.log("withdrawal failed");
+      }
     };
 
     // --------------------------------------- return
@@ -394,19 +360,19 @@ export default defineComponent({
     return {
       currentTS: Date.now(),
       wallet,
-      desiredWalletNFTs,
-      desiredVaultNFTs,
-      toVaultNFTs,
-      toWalletNFTs,
       handleWalletNFTSelected,
       handleVaultNFTSelected,
       moveNFTsToVault,
       moveNFTsBackToWallet,
-      moveNFTsOnChain,
+      beginStaking,
+      endStaking,
+      claimRewards,
       bank,
       // eslint-disable-next-line vue/no-dupe-keys
       vault,
       vaultLocked,
+      currentWalletNFTs,
+      currentVaultNFTs,
       selectedWalletNFTs,
       selectedVaultNFTs,
       parseDate,
@@ -427,8 +393,7 @@ export default defineComponent({
   @apply text-center bg-black text-white;
   position: absolute;
   top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 10px;
   opacity: 0.65;
   z-index: 10;
   padding: 10px 15px;
