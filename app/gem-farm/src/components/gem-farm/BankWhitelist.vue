@@ -53,7 +53,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import { WhitelistType } from '../../../../../src';
+import { WhitelistType } from '@gemworks/gem-farm-ts';
 import useCluster from '@/composables/cluster';
 import { useWallet } from 'solana-wallets-vue'
 import { PublicKey } from '@solana/web3.js';

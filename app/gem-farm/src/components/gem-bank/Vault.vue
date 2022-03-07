@@ -96,7 +96,7 @@ import { PublicKey } from '@solana/web3.js';
 import { getListDiffBasedOnMints, removeManyFromList } from '@/common/util';
 import { BN } from '@project-serum/anchor';
 import { parseDate } from '@/common/util';
-import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, COOLING_DOWN_NAME, SPL_TOKEN_NAME, UNSTAKE_NAME } from '../../../../../src'
+import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, COOLING_DOWN_NAME, SPL_TOKEN_NAME, UNSTAKE_NAME } from '@/common/config'
 
 export default defineComponent({
   components: { NFTGrid },

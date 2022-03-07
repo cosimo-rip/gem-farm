@@ -28,7 +28,7 @@ import { useWallet } from 'solana-wallets-vue';
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
 import { PublicKey } from '@solana/web3.js';
-import { findFarmTreasuryPDA } from '../../../../../src';
+import { findFarmTreasuryPDA } from '@gemworks/gem-farm-ts';
 
 export default defineComponent({
   props: {

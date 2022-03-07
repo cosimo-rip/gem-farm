@@ -40,7 +40,7 @@
 import { defineComponent } from 'vue';
 import FixedScheduleDisplay from '@/components/gem-farm/FixedScheduleDisplay.vue';
 import { parseDate } from '@/common/util';
-import { SPL_TOKEN_NAME } from '../../../../../src'
+import { SPL_TOKEN_NAME } from '@/common/config'
 import numeral from 'numeral';
 
 export default defineComponent({

@@ -9,9 +9,8 @@ import {
   FixedRateConfig,
   WhitelistType,
   findWhitelistProofPDA,
-  GEM_FARM_PROG_ID,
-  GEM_BANK_PROG_ID,
-} from '../../../../../src';
+} from '@gemworks/gem-farm-ts';
+import { GEM_FARM_PROG_ID, GEM_BANK_PROG_ID } from '../config';
 import { programs } from '@metaplex/js';
 
 export async function initGemFarm(

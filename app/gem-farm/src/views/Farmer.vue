@@ -112,7 +112,8 @@ import FarmerDisplay from '@/components/gem-farm/FarmerDisplay.vue';
 import FarmerRewardDisplay from '@/components/gem-farm/FarmerRewardDisplay.vue'
 import Vault from '@/components/gem-bank/Vault.vue';
 import { INFT } from '@/common/web3/NFTget';
-import { findFarmerPDA, stringifyPKsAndBNs, PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID, COOLING_DOWN_NAME } from '../../../../src';
+import { findFarmerPDA, stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
+import { PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID } from '@/common/config';
 import App from '../App.vue'
 import VueToast from 'vue-toast-notification';
 

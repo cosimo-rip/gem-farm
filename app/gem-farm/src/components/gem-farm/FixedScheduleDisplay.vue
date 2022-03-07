@@ -46,7 +46,7 @@
 import { defineComponent } from 'vue';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { parseDate } from '@/common/util';
-import { WELCOME_MSG, VAULT_NAME, SPL_TOKEN_NAME, NFT_SHORT_NAME, STAKED_NAME, UNSTAKE_CHARACTER, UNSTAKE_CHARACTER_PRONOUN, UNSTAKE_NAME } from '../../../../../src'
+import { WELCOME_MSG, VAULT_NAME, SPL_TOKEN_NAME, NFT_SHORT_NAME, STAKED_NAME, UNSTAKE_CHARACTER, UNSTAKE_CHARACTER_PRONOUN, UNSTAKE_NAME } from '@/common/config';
 
 export default defineComponent({
   props: {

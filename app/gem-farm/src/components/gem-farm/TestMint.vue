@@ -17,7 +17,7 @@
 import { defineComponent, ref } from 'vue';
 import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
-import { BrowserWallet } from '../../../../../src';
+import { BrowserWallet } from '@gemworks/gem-farm-ts';
 
 export default defineComponent({
   setup() {

@@ -1,6 +1,6 @@
 import moment from 'moment/moment';
 import { BN } from '@project-serum/anchor';
-import { toBN } from '../../../../../src';
+import { toBN } from '@gemworks/gem-farm-ts';
 
 export function removeManyFromList(toRemove: any[], fromList: any[]) {
   toRemove.forEach((i) => {

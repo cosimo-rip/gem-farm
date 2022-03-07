@@ -44,7 +44,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import RewardDisplay from '@/components/gem-farm/RewardDisplay.vue';
-import { NFT_SHORT_NAME } from '../../../../../src'
+import { NFT_SHORT_NAME } from '@/common/config'
 export default defineComponent({
   components: { RewardDisplay },
   props: {

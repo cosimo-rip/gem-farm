@@ -1,10 +1,10 @@
 import { BN, Idl } from '@project-serum/anchor';
 import {
   findWhitelistProofPDA,
-  GEM_BANK_PROG_ID,
   GemBankClient,
   WhitelistType,
-} from '../../../../../src';
+} from '@gemworks/gem-farm-ts';
+import { GEM_BANK_PROG_ID } from '../config';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { SignerWalletAdapter } from '@solana/wallet-adapter-base';
 import { NodeWallet, programs } from '@metaplex/js';
