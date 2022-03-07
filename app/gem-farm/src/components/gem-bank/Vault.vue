@@ -147,12 +147,18 @@ export default defineComponent({
           getConnection()
         )
         console.log("wallet nfts: ", allWalletNFTs);
-        const filteredNFTs = allWalletNFTs.filter((nft: INFT) => 
+        const filteredNFTs = allWalletNFTs
+          .filter((nft: INFT) => 
             (nft.onchainMetadata as any).data
             && (nft.onchainMetadata as any).data.creators
             && (nft.onchainMetadata as any).data.creators.length > 0 
             && (nft.onchainMetadata as any).data.creators[0].address == WALLET_NFT_CREATOR_FILTER.toString()
-        )
+          )
+          .sort((nftA: INFT, nftB: INFT) => { 
+            const nameA = (nftA.externalMetadata as any).name;
+            const nameB = (nftB.externalMetadata as any).name;
+            return nameA.localeCompare(nameB)
+          })
         console.log("filtered nfts: ", filteredNFTs);
         currentWalletNFTs.value = filteredNFTs
         desiredWalletNFTs.value = [...currentWalletNFTs.value];
@@ -173,10 +179,18 @@ export default defineComponent({
         const mints = foundGDRs.map((gdr: any) => {
           return { mint: gdr.account.gemMint };
         });
-        currentVaultNFTs.value = await getNFTMetadataForMany(
+        const vaultNFTs = await getNFTMetadataForMany(
           mints,
           getConnection()
         );
+        console.log("vault nfts:", vaultNFTs);
+        const sortedVaultNFTs = vaultNFTs.sort((nftA: INFT, nftB: INFT) => { 
+          const nameA = (nftA.externalMetadata as any).name;
+          const nameB = (nftB.externalMetadata as any).name;
+          return nameA.localeCompare(nameB)
+        });
+        console.log("vault nfts:", sortedVaultNFTs);
+        currentVaultNFTs.value = sortedVaultNFTs
         desiredVaultNFTs.value = [...currentVaultNFTs.value];
         console.log(
           `populated a total of ${currentVaultNFTs.value.length} vault NFTs`
