@@ -205,7 +205,7 @@ export default defineComponent({
         } catch (e) {
           console.log(`farm with PK ${farm.value} not found :(`);
           console.log(e);
-          // fetchingFarmFailed.value = true;
+          fetchingFarmFailed.value = true;
         }
       }
     };
