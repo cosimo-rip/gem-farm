@@ -19,13 +19,14 @@
       </span>
     </div>
 
-    <div v-if="farmAcc && magicEdenFloor && solPrice" class="bg-white p-3 rounded-xl">
+    <div class="bg-white p-3 rounded-xl">
       <span class="text-gray-600">
         <label class="text-sm">
         Total Minimum Value Locked
         </label><br />
-        <span class="font-semibold text-indigo-600 text-3xl">${{ (Math.floor((parseInt(farmAcc.gemsStaked) * magicEdenFloor * solPrice) * 100))/100 }}</span><br />
-        <span class="text-xs italic text-gray-400">based on {{magicEdenFloor}} SOL floor</span>
+        <span v-if="farmAcc && magicEdenFloor && solPrice" class="font-semibold text-indigo-600 text-3xl">${{ (Math.floor((parseInt(farmAcc.gemsStaked) * magicEdenFloor * solPrice) * 100))/100 }}</span>
+        <span v-else class="font-semibold text-indigo-600 text-3xl">–</span><br />
+        <span v-if="farmAcc && magicEdenFloor && solPrice" class="text-xs italic text-gray-400">based on {{magicEdenFloor}} SOL floor</span>
       </span>
     </div>
 
