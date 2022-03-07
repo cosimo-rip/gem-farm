@@ -39,42 +39,12 @@
             class="mb-10"
             :vault="farmerAcc.vault.toBase58()"
             :farmerState="farmerState"
+            :farmAcc="farmAcc"
+            :farmerAcc="farmerAcc"
             :cooldownEndsTs="farmerAcc.cooldownEndsTs"
             :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
             @selected-wallet-nft="handleNewSelectedNFT"
-          >
-            <!-- <button
-              v-if="farmerState === 'staked' && selectedNFTs.length > 0"
-              class="is-primary mr-5 primary"
-              @click="addGems"
-            >
-              Add {{NFT_SHORT_NAME}}
-            </button> -->
-            <button
-              v-if="farmerState === 'unstaked' && farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
-              class="is-success mr-5 primary"
-              @click="beginStaking"
-            >
-              {{STAKE_NAME}} {{NFT_SHORT_NAME}}
-            </button>
-            <button
-              v-if="farmerState === 'staked'"
-              class="is-error mr-5 primary"
-              @click="endStaking"
-            >
-              {{UNSTAKE_NAME}} {{NFT_SHORT_NAME}}
-            </button>
-            <button
-              v-if="farmerState === 'pendingCooldown' && farmerAcc.cooldownEndsTs < currentTS / 1000"
-              class="is-error mr-5 primary"
-              @click="endStaking"
-            >
-              Retrieve {{NFT_SHORT_NAME}}
-            </button>
-            <button class="primary" v-if="farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0" @click="claim">
-              Claim {{Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0 ? Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) : "")}} ${{SPL_TOKEN_NAME}}
-            </button>
-          </Vault>
+          />
         </div>
 
 

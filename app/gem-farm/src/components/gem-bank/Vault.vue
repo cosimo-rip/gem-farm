@@ -12,7 +12,37 @@
       >
         Save Changes
       </button>
-      <slot />
+      <!-- <button
+        v-if="farmerState === 'staked' && selectedNFTs.length > 0"
+        class="is-primary mr-5 primary"
+        @click="addGems"
+      >
+        Add {{NFT_SHORT_NAME}}
+      </button> -->
+      <button
+        v-if="farmerState === 'unstaked' && farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000) && (!toWalletNFTs || !toWalletNFTs.length) && (!toVaultNFTs || !toVaultNFTs.length)"
+        class="is-success mr-5 primary"
+        @click="beginStaking"
+      >
+        {{STAKE_NAME}} {{NFT_SHORT_NAME}}
+      </button>
+      <button
+        v-if="farmerState === 'staked' && (!toWalletNFTs || !toWalletNFTs.length) && (!toVaultNFTs || !toVaultNFTs.length)"
+        class="is-error mr-5 primary"
+        @click="endStaking"
+      >
+        {{UNSTAKE_NAME}} {{NFT_SHORT_NAME}}
+      </button>
+      <button
+        v-if="farmerState === 'pendingCooldown' && farmerAcc.cooldownEndsTs < this.currentTS / 1000"
+        class="is-error mr-5 primary"
+        @click="endStaking"
+      >
+        Retrieve {{NFT_SHORT_NAME}}
+      </button>
+      <button class="primary" v-if="farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0" @click="claim">
+        Claim {{Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0 ? Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) : "")}} ${{SPL_TOKEN_NAME}}
+      </button>
     </div>
 
     <!--Vault-->
@@ -98,7 +128,7 @@ import { PublicKey } from '@solana/web3.js';
 import { getListDiffBasedOnMints, removeManyFromList } from '@/common/util';
 import { BN } from '@project-serum/anchor';
 import { parseDate } from '@/common/util';
-import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, COOLING_DOWN_NAME, SPL_TOKEN_NAME, UNSTAKE_NAME } from '@/common/config'
+import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, COOLING_DOWN_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME } from '@/common/config'
 
 export default defineComponent({
   components: { NFTGrid },
@@ -112,6 +142,8 @@ export default defineComponent({
   props: {
     vault: String,
     farmerState: String,
+    farmAcc: Object,
+    farmerAcc: Object,
     cooldownEndsTs: Object,
     eventIsActive: Boolean
   },
@@ -138,6 +170,7 @@ export default defineComponent({
     // --------------------------------------- populate initial nfts
 
     const populateWalletNFTs = async () => {
+
       // zero out to begin with
       currentWalletNFTs.value = [];
       selectedWalletNFTs.value = [];
@@ -148,7 +181,6 @@ export default defineComponent({
           wallet.value!.publicKey!,
           getConnection()
         )
-        console.log("wallet nfts: ", allWalletNFTs);
         const filteredNFTs = allWalletNFTs
           .filter((nft: INFT) => 
             (nft.onchainMetadata as any).data
@@ -161,13 +193,14 @@ export default defineComponent({
             const nameB = (nftB.externalMetadata as any).name;
             return nameA.localeCompare(nameB)
           })
-        console.log("filtered nfts: ", filteredNFTs);
+        console.log("filtered wallet nfts: ", filteredNFTs);
         currentWalletNFTs.value = filteredNFTs
-        desiredWalletNFTs.value = [...currentWalletNFTs.value];
+        desiredWalletNFTs.value = filteredNFTs
       }
     };
 
     const populateVaultNFTs = async () => {
+
       // zero out to begin with
       currentVaultNFTs.value = [];
       selectedVaultNFTs.value = [];
@@ -190,12 +223,9 @@ export default defineComponent({
           const nameB = (nftB.externalMetadata as any).name;
           return nameA.localeCompare(nameB)
         });
-        console.log("vault nfts:", sortedVaultNFTs);
         currentVaultNFTs.value = sortedVaultNFTs
-        desiredVaultNFTs.value = [...currentVaultNFTs.value];
-        console.log(
-          `populated a total of ${currentVaultNFTs.value.length} vault NFTs`
-        );
+        desiredVaultNFTs.value = sortedVaultNFTs;
+        console.log("sorted vault NFTs", sortedVaultNFTs);
       }
     };
 
@@ -385,6 +415,7 @@ export default defineComponent({
       NFT_SHORT_NAME,
       COOLING_DOWN_NAME,
       SPL_TOKEN_NAME,
+      STAKE_NAME,
       UNSTAKE_NAME
     };
   },
