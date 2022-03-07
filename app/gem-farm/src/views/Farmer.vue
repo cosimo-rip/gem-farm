@@ -71,12 +71,13 @@
             >
               Retrieve {{NFT_SHORT_NAME}}
             </button>
-            <button class="primary" v-if="(((farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward) / (1000000000)) + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) > 0" @click="claim">
-              Claim {{Math.floor(((farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward) / (1000000000)) + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) > 0 ? Math.floor(((farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward) / (1000000000)) + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) : ""}} ${{SPL_TOKEN_NAME}}
-              
+            <button class="primary" v-if="farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0" @click="claim">
+              Claim {{Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0 ? Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) : "")}} ${{SPL_TOKEN_NAME}}
             </button>
           </Vault>
         </div>
+
+
       </div>
       <div v-else>
         <div class="text-center h-full flex bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
