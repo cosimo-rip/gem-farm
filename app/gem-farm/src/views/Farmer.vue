@@ -76,7 +76,6 @@
               
             </button>
           </Vault>
-          <div>a {{this.currentTS}} {{(Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs)}}</div>
         </div>
       </div>
       <div v-else>
