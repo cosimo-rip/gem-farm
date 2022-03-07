@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="isFrontend" class="text-left text-gray-600 mb-6 pr-40">
-      {{WELCOME_MSG}} Earn <strong>{{ schedule.baseRate }} ${{SPL_TOKEN_NAME}} per day</strong> for each item {{STAKED_NAME.toLowerCase()}} in this {{VAULT_NAME.toLowerCase()}}.<br />
+      {{WELCOME_MSG}} Earn <strong>{{ (86400 / schedule.denominator) * schedule.baseRate }} ${{SPL_TOKEN_NAME}} per day</strong> for each item {{STAKED_NAME.toLowerCase()}} in this {{VAULT_NAME.toLowerCase()}}.<br />
       <span class="italic text-xs">Rules &amp; Disclaimers: ${{SPL_TOKEN_NAME}} has no monetary value. Stake at your own risk. Unstaking: It takes the {{UNSTAKE_CHARACTER.toLowerCase()}} {{ parseTime(farmAcc.config.cooldownPeriodSec) }} to {{UNSTAKE_NAME.toLowerCase()}} {{STAKED_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}, and {{UNSTAKE_CHARACTER_PRONOUN.toLowerCase()}} charges a {{ farmAcc.config.unstakingFeeLamp / LAMPORTS_PER_SOL }} SOL fee.</span><br />
       <br />
       
