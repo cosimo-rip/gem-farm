@@ -32,6 +32,7 @@
     <NFTGrid
       v-if="bank && vault"
       :title="VAULT_NAME"
+      :loading="vaultLoading"
       :emptyMessage="'Your ' + VAULT_NAME.toLowerCase() + ' is empty'"
       class="mb-4 relative"
       :nfts="currentVaultNFTs"
@@ -88,6 +89,7 @@
     <NFTGrid
       v-if="bank && vault"
       title="Wallet"
+      :loading="walletLoading"
       :emptyMessage="'Your wallet contains no ' + NFT_SHORT_NAME"
       class="relative"
       :nfts="currentWalletNFTs"
@@ -121,6 +123,7 @@ import { PublicKey } from '@solana/web3.js';
 import { BN } from '@project-serum/anchor';
 import { parseDate } from '@/common/util';
 import { useToast } from 'vue-toastification';
+import { useLoading } from 'vue-loading-overlay';
 import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, NFT_SHORT_NAME_SINGULAR, COOLING_DOWN_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME } from '@/common/config'
 
 export default defineComponent({
@@ -145,6 +148,7 @@ export default defineComponent({
     const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
     const toast = useToast();
+    const loader = useLoading({ color: '#4f46e5', loader: 'dots'});
 
     // --------------------------------------- state
 
@@ -159,6 +163,7 @@ export default defineComponent({
     // --------------------------------------- populate initial nfts
 
     const populateWalletNFTs = async () => {
+      walletLoading.value = true;
 
       // zero out to begin with
       currentWalletNFTs.value = [];
@@ -184,9 +189,11 @@ export default defineComponent({
         console.log("filtered wallet nfts: ", filteredNFTs);
         currentWalletNFTs.value = filteredNFTs
       }
+      walletLoading.value = false;
     };
 
     const populateVaultNFTs = async () => {
+      vaultLoading.value = true;
 
       // zero out to begin with
       currentVaultNFTs.value = [];
@@ -212,6 +219,7 @@ export default defineComponent({
         currentVaultNFTs.value = sortedVaultNFTs
         console.log("sorted vault NFTs", sortedVaultNFTs);
       }
+      vaultLoading.value = false;
     };
 
     const updateVaultState = async () => {
@@ -297,6 +305,7 @@ export default defineComponent({
 
     //todo jam into single tx
     const moveNFTsOnChain = async (toVaultNFTs: INFT[], toWalletNFTs: INFT[]) => {
+      const ld = loader.show();
       let allSucceeded = true;
       for (const nft of toVaultNFTs) {
         console.log(nft);
@@ -307,9 +316,9 @@ export default defineComponent({
         console.log('creator is', creator.toBase58());
         try {
           await depositGem(nft.mint, creator, nft.pubkey!);
-        } catch (e) {
+        } catch (error) {
           allSucceeded = false;
-          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to ${VAULT_NAME}`);
+          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to ${VAULT_NAME}: ${error.message}`);
         }
       }
       if (toVaultNFTs.length > 0 && allSucceeded) {
@@ -319,14 +328,16 @@ export default defineComponent({
       for (const nft of toWalletNFTs) {
         try {
           await withdrawGem(nft.mint);
-        } catch (e) {
+        } catch (error) {
           allSucceeded = false;
-          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to wallet`);
+          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to wallet: ${error.message}`);
         }
       }
       if (toWalletNFTs.length > 0 && allSucceeded) {
         toast.success(`${NFT_SHORT_NAME_SINGULAR} returned to wallet`);
       }
+      ld.hide()
+      
       setTimeout(async function() {
         await Promise.all([populateWalletNFTs(), populateVaultNFTs()]);
       }, 2000)
@@ -339,7 +350,9 @@ export default defineComponent({
     const vault = ref<PublicKey>();
     const vaultAcc = ref<any>();
     const gdrs = ref<PublicKey[]>([]);
-    const vaultLocked = ref<boolean>(false);
+    const vaultLocked = ref(false);
+    const vaultLoading = ref(true);
+    const walletLoading = ref(true);
 
     const depositGem = async (
       mint: PublicKey,
@@ -383,6 +396,8 @@ export default defineComponent({
       // eslint-disable-next-line vue/no-dupe-keys
       vault,
       vaultLocked,
+      vaultLoading,
+      walletLoading,
       currentWalletNFTs,
       currentVaultNFTs,
       selectedWalletNFTs,

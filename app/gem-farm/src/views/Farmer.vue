@@ -88,6 +88,7 @@ import FarmerRewardDisplay from '@/components/gem-farm/FarmerRewardDisplay.vue'
 import Vault from '@/components/gem-bank/Vault.vue';
 import { findFarmerPDA, stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
 import { useToast } from "vue-toastification";
+import { useLoading } from 'vue-loading-overlay';
 import { PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, STAKED_NAME, UNSTAKE_NAME, UNSTAKED_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID } from '@/common/config';
 
 export default defineComponent({
@@ -104,6 +105,7 @@ export default defineComponent({
     const { wallet, connecting, connected } = useWallet();
     const { cluster, getConnection } = useCluster();
     const toast = useToast();
+    const loader = useLoading({ color: '#4f46e5', loader: 'bars'});
 
     let gf: any;
     watch([wallet, connected, cluster], async () => {
@@ -203,12 +205,13 @@ export default defineComponent({
         await gf.initFarmerWallet(new PublicKey(farm.value));
         await fetchFarmer(wallet.value as any);
       } catch (error) {
-        toast.error("Failed to create " + VAULT_NAME + ".");
+        toast.error(`Failed to create ${VAULT_NAME}: ${error.message}`);
       }
     };
 
     // --------------------------------------- staking
     const beginStaking = async () => {
+      const ld = loader.show();
       try {
         await gf.stakeWallet(new PublicKey(farm.value));
         await fetchFarmer(wallet.value as any);
@@ -217,9 +220,11 @@ export default defineComponent({
       } catch (error) {
         toast.error(`${STAKE_NAME} Failed: ${error.message}`);
       }
+      ld.hide()
     };
 
     const endStaking = async () => {
+      const ld = loader.show();
       try {
         await gf.unstakeWallet(new PublicKey(farm.value!));
         await fetchFarmer(wallet.value as any);
@@ -228,9 +233,11 @@ export default defineComponent({
       } catch (error) {
         toast.error(`${UNSTAKE_NAME} Failed: ${error.message}`);
       }
+      ld.hide();
     };
     
     const claimRewards = async () => {
+      const ld = loader.show();
       try {
         await gf.claimWallet(
           new PublicKey(farm.value!),
@@ -242,6 +249,7 @@ export default defineComponent({
       } catch (error) {
         toast.error(`Claiming $${SPL_TOKEN_NAME} Failed: ${error.message}`);
       }
+      ld.hide();
     };
 
     return {

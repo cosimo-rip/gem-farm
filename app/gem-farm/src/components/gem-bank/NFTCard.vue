@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, toRef } from 'vue';
 export default defineComponent({
   props: {
     nft: { type: Object, required: true },
@@ -42,7 +42,7 @@ export default defineComponent({
 
     return {
       selected,
-      disabled: props.disabled,
+      disabled: toRef(props, "disabled"),
       toggleSelect,
     };
   },

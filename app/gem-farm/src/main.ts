@@ -9,6 +9,8 @@ import App from './App.vue';
 import SolanaWallets from 'solana-wallets-vue';
 import router from './router';
 import Toast from 'vue-toastification';
+import VueLoading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 import 'vue-toastification/dist/index.css';
 
 import 'solana-wallets-vue/styles.css';
@@ -33,6 +35,7 @@ const walletOptions = {
 
 createApp(App)
   .use(SolanaWallets, walletOptions)
+  .use(VueLoading)
   .use(Toast, {
     transition: 'Vue-Toastification__fade',
     maxToasts: 10,
