@@ -10,7 +10,7 @@ export const WALLET_NFT_CREATOR_FILTER = new PublicKey(
   'Bhr9iWx7vAZ4JDD5DVSdHxQLqG9RvCLCSXvu6yC4TF6c'
 );
 
-export const ACTIVE_FARM_ID = 'EcikR7zeJXpTFH6kAhGr8qvF1NKWZsK25u7fmbjDcinA';
+export const ACTIVE_FARM_ID = '';
 
 export const PAGE_TITLE = 'SKULL STAKING';
 export const NFT_SHORT_NAME = 'SKULLS';
