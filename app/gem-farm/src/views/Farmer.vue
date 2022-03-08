@@ -111,15 +111,15 @@ export default defineComponent({
     watch([wallet, connected, cluster], async () => {
       if (wallet.value && getConnection()) {
         console.log("wallet updated with wallet and connection")
-        await freshStart(wallet.value, getConnection());
+        await freshStart(wallet.value, cluster.value, getConnection());
       }
     });
 
     //needed in case we switch in from another window
     onMounted(async () => {
-      if (wallet.value && wallet.value.publicKey && getConnection()) {
+      if (wallet.value && wallet.value.publicKey && cluster.value && getConnection()) {
         console.log("mounted with wallet and connection")
-        await freshStart(wallet.value, getConnection());
+        await freshStart(wallet.value, cluster.value, getConnection());
       }
     });
 
@@ -137,6 +137,8 @@ export default defineComponent({
     const fetchingFarmFailed = ref<boolean>(false);
 
     const loading = ref<boolean>(true);
+    const loadedWallet = ref<any>(null);
+    const loadedCluster = ref<any>(null);
 
     const updateAvailableRewards = async () => {
       availableA.value = farmerAcc.value.rewardA.accruedReward
@@ -171,7 +173,21 @@ export default defineComponent({
       );
     };
 
-    const freshStart = async (wallet: any, connection: any) => {
+    const freshStart = async (wallet: any, cluster: String, connection: any) => {
+      if (wallet.publicKey.toString() == loadedWallet.value 
+          && cluster == loadedCluster.value) {
+        // duplicate request
+        console.log("suppressed duplicate request");
+        return;
+      }
+
+      console.log(loadedWallet.value + " vs " + wallet.publicKey.toString());
+      console.log(loadedCluster.value + " vs " + cluster);
+
+      loading.value = true;
+      loadedWallet.value = wallet.publicKey.toString();
+      loadedCluster.value = cluster;
+
       gf = await initGemFarm(connection, wallet);
       farmerIdentity.value = wallet.publicKey?.toBase58();
 
@@ -197,7 +213,9 @@ export default defineComponent({
         console.log(`no farmer found with public key: ${wallet.publicKey}`);
       }
 
-      loading.value = false;
+      setTimeout(function() {
+        loading.value = false;
+      }, 500)
     };
 
     const initFarmer = async () => {

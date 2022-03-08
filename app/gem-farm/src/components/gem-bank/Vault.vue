@@ -340,7 +340,7 @@ export default defineComponent({
       
       setTimeout(async function() {
         await Promise.all([populateWalletNFTs(), populateVaultNFTs()]);
-      }, 2000)
+      }, 100)
     };
 
     // --------------------------------------- gem bank
