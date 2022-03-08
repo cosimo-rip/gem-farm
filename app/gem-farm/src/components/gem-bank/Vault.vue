@@ -148,7 +148,7 @@ export default defineComponent({
     const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
     const toast = useToast();
-    const loader = useLoading({ color: '#4f46e5', loader: 'dots'});
+    const loader = useLoading({ color: '#4f46e5', loader: 'bars'});
 
     // --------------------------------------- state
 
