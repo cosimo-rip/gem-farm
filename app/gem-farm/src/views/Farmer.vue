@@ -87,9 +87,8 @@ import FarmerDisplay from '@/components/gem-farm/FarmerDisplay.vue';
 import FarmerRewardDisplay from '@/components/gem-farm/FarmerRewardDisplay.vue'
 import Vault from '@/components/gem-bank/Vault.vue';
 import { findFarmerPDA, stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
-import { PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID } from '@/common/config';
-import App from '../App.vue'
-import VueToast from 'vue-toast-notification';
+import { useToast } from "vue-toastification";
+import { PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, STAKED_NAME, UNSTAKE_NAME, UNSTAKED_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID } from '@/common/config';
 
 export default defineComponent({
   components: { Vault, FarmerDisplay, FarmerRewardDisplay, ConfigPane },
@@ -104,6 +103,7 @@ export default defineComponent({
   setup() {
     const { wallet, connecting, connected } = useWallet();
     const { cluster, getConnection } = useCluster();
+    const toast = useToast();
 
     let gf: any;
     watch([wallet, connected, cluster], async () => {
@@ -170,7 +170,6 @@ export default defineComponent({
     };
 
     const freshStart = async (wallet: any, connection: any) => {
-
       gf = await initGemFarm(connection, wallet);
       farmerIdentity.value = wallet.publicKey?.toBase58();
 
@@ -185,7 +184,7 @@ export default defineComponent({
         await fetchFarn();
         fetchingFarmFailed.value = false;
       } catch (e) {
-        console.log(`farm failed to load`);
+        toast.error("Failed to load app. Please try again later.");
         console.log(e);
         fetchingFarmFailed.value = true;
       }
@@ -204,7 +203,7 @@ export default defineComponent({
         await gf.initFarmerWallet(new PublicKey(farm.value));
         await fetchFarmer(wallet.value as any);
       } catch (error) {
-        App.$toast.open("Failed to create " + VAULT_NAME + ".");
+        toast.error("Failed to create " + VAULT_NAME + ".");
       }
     };
 
@@ -213,9 +212,10 @@ export default defineComponent({
       try {
         await gf.stakeWallet(new PublicKey(farm.value));
         await fetchFarmer(wallet.value as any);
-      } catch (error) {
 
-        App.$toast.open("Staking Failed");
+        toast.success(`${NFT_SHORT_NAME} ${STAKED_NAME}`);
+      } catch (error) {
+        toast.error(`${STAKE_NAME} Failed: ${error.message}`);
       }
     };
 
@@ -223,19 +223,25 @@ export default defineComponent({
       try {
         await gf.unstakeWallet(new PublicKey(farm.value!));
         await fetchFarmer(wallet.value as any);
+
+        toast.success(`${NFT_SHORT_NAME} ${UNSTAKED_NAME}`);
       } catch (error) {
-        console.log("end staking failed")
-        App.$toast.open("End Staking Failed.");
+        toast.error(`${UNSTAKE_NAME} Failed: ${error.message}`);
       }
     };
-
+    
     const claimRewards = async () => {
-      await gf.claimWallet(
-        new PublicKey(farm.value!),
-        new PublicKey(farmAcc.value.rewardA.rewardMint!),
-        new PublicKey(farmAcc.value.rewardB.rewardMint!)
-      );
-      await fetchFarmer(wallet.value as any);
+      try {
+        await gf.claimWallet(
+          new PublicKey(farm.value!),
+          new PublicKey(farmAcc.value.rewardA.rewardMint!),
+          new PublicKey(farmAcc.value.rewardB.rewardMint!)
+        );
+        await fetchFarmer(wallet.value as any);
+        toast.success(`$${SPL_TOKEN_NAME} Claimed`);
+      } catch (error) {
+        toast.error(`Claiming $${SPL_TOKEN_NAME} Failed: ${error.message}`);
+      }
     };
 
     return {

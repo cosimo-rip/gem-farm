@@ -120,7 +120,8 @@ import { initGemBank } from '@/common/gem-bank';
 import { PublicKey } from '@solana/web3.js';
 import { BN } from '@project-serum/anchor';
 import { parseDate } from '@/common/util';
-import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, COOLING_DOWN_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME } from '@/common/config'
+import { useToast } from 'vue-toastification';
+import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, NFT_SHORT_NAME_SINGULAR, COOLING_DOWN_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME } from '@/common/config'
 
 export default defineComponent({
   components: { NFTGrid },
@@ -143,6 +144,7 @@ export default defineComponent({
   setup(props, ctx) {
     const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
+    const toast = useToast();
 
     // --------------------------------------- state
 
@@ -295,6 +297,7 @@ export default defineComponent({
 
     //todo jam into single tx
     const moveNFTsOnChain = async (toVaultNFTs: INFT[], toWalletNFTs: INFT[]) => {
+      let allSucceeded = true;
       for (const nft of toVaultNFTs) {
         console.log(nft);
         const creator = new PublicKey(
@@ -302,10 +305,27 @@ export default defineComponent({
           (nft.onchainMetadata as any).data.creators[0].address
         );
         console.log('creator is', creator.toBase58());
-        await depositGem(nft.mint, creator, nft.pubkey!);
+        try {
+          await depositGem(nft.mint, creator, nft.pubkey!);
+        } catch (e) {
+          allSucceeded = false;
+          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to ${VAULT_NAME}`);
+        }
       }
+      if (toVaultNFTs.length > 0 && allSucceeded) {
+        toast.success(`${NFT_SHORT_NAME_SINGULAR} moved to ${VAULT_NAME}`);
+      }
+      allSucceeded = true
       for (const nft of toWalletNFTs) {
-        await withdrawGem(nft.mint);
+        try {
+          await withdrawGem(nft.mint);
+        } catch (e) {
+          allSucceeded = false;
+          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to wallet`);
+        }
+      }
+      if (toWalletNFTs.length > 0 && allSucceeded) {
+        toast.success(`${NFT_SHORT_NAME_SINGULAR} returned to wallet`);
       }
       setTimeout(async function() {
         await Promise.all([populateWalletNFTs(), populateVaultNFTs()]);
@@ -326,33 +346,25 @@ export default defineComponent({
       creator: PublicKey,
       source: PublicKey
     ) => {
-      try {
-        const { txSig } = await gb.depositGemWallet(
-          bank.value,
-          vault.value,
-          new BN(1),
-          mint,
-          source,
-          creator
-        );
-        console.log('deposit done', txSig);
-      } catch (e) {
-        console.log("deposit failed");
-      }
+      const { txSig } = await gb.depositGemWallet(
+        bank.value,
+        vault.value,
+        new BN(1),
+        mint,
+        source,
+        creator
+      );
+      console.log('deposit done', txSig);
     };
 
     const withdrawGem = async (mint: PublicKey) => {
-      try {
-        const { txSig } = await gb.withdrawGemWallet(
-          bank.value,
-          vault.value,
-          new BN(1),
-          mint
-        );
-        console.log('withdrawal done', txSig);
-      } catch (e) {
-        console.log("withdrawal failed");
-      }
+      const { txSig } = await gb.withdrawGemWallet(
+        bank.value,
+        vault.value,
+        new BN(1),
+        mint
+      );
+      console.log('withdrawal done', txSig);
     };
 
     // --------------------------------------- return
