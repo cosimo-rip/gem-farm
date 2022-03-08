@@ -322,7 +322,11 @@ export default defineComponent({
         }
       }
       if (toVaultNFTs.length > 0 && allSucceeded) {
-        toast.success(`${NFT_SHORT_NAME_SINGULAR} moved to ${VAULT_NAME}`);
+        if (toVaultNFTs.length == 1) {
+          toast.success(`${NFT_SHORT_NAME_SINGULAR} moved to ${VAULT_NAME}`);
+        } else {
+          toast.success(`${NFT_SHORT_NAME} moved to ${VAULT_NAME}`);
+        }
       }
       allSucceeded = true
       for (const nft of toWalletNFTs) {
@@ -334,7 +338,11 @@ export default defineComponent({
         }
       }
       if (toWalletNFTs.length > 0 && allSucceeded) {
-        toast.success(`${NFT_SHORT_NAME_SINGULAR} returned to wallet`);
+        if (toWalletNFTs.length == 1) {
+          toast.success(`${NFT_SHORT_NAME_SINGULAR} returned to wallet`);
+        } else {
+          toast.success(`${NFT_SHORT_NAME} returned to wallet`);
+        }
       }
       ld.hide()
       
