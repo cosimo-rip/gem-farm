@@ -131,7 +131,7 @@ export default defineComponent({
 
     //needed in case we switch in from another window
     onMounted(async () => {
-      if (wallet && getConnection()) {
+      if (wallet.value && getConnection()) {
         gf = await initGemFarm(getConnection(), wallet.value as any);
         await findFarmsByManager(wallet.value!.publicKey!);
       }

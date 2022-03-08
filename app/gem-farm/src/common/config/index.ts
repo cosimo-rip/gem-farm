@@ -22,6 +22,7 @@ export const COOLING_DOWN_NAME = 'Reanimating';
 export const STAKE_NAME = 'Bury';
 export const STAKED_NAME = 'Buried';
 export const UNSTAKE_NAME = 'Exhume';
+export const UNSTAKED_NAME = 'Exhumed';
 export const WELCOME_MSG = 'Welcome to the graveyard.';
 export const UNSTAKE_CHARACTER = 'Gravedigger';
 export const UNSTAKE_CHARACTER_PRONOUN = 'He';

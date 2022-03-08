@@ -1,12 +1,5 @@
 <template>
 <div>
-  <div class="absolute top-5 right-5 primary px-4 py-2 rounded-full bg-indigo-500 cursor-pointer" @click="refreshFarmer">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-5 -mt-1 inline-block text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-    <span class="text-white inline-block ml-1">Refresh</span>
-  </div>
-
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-center mb-4">
 
     <div class="bg-white p-3 rounded-xl">
@@ -19,13 +12,14 @@
       </span>
     </div>
 
-    <div v-if="farmAcc && magicEdenFloor && solPrice" class="bg-white p-3 rounded-xl">
+    <div class="bg-white p-3 rounded-xl">
       <span class="text-gray-600">
         <label class="text-sm">
         Total Minimum Value Locked
         </label><br />
-        <span class="font-semibold text-indigo-600 text-3xl">${{ (Math.floor((parseInt(farmAcc.gemsStaked) * magicEdenFloor * solPrice) * 100))/100 }}</span><br />
-        <span class="text-xs italic text-gray-400">based on {{magicEdenFloor}} SOL floor</span>
+        <span v-if="farmAcc && magicEdenFloor && solPrice" class="font-semibold text-indigo-600 text-3xl">${{ (Math.floor((parseInt(farmAcc.gemsStaked) * magicEdenFloor * solPrice) * 100))/100 }}</span>
+        <span v-else class="font-semibold text-indigo-600 text-3xl">–</span><br />
+        <span v-if="farmAcc && magicEdenFloor && solPrice" class="text-xs italic text-gray-400">based on {{magicEdenFloor}} SOL floor</span>
       </span>
     </div>
 
@@ -71,7 +65,6 @@ export default defineComponent({
     farmer: String,
     farmerAcc: Object,
   },
-  emits: ['refresh-farmer'],
   setup(props, ctx) {
     const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
@@ -86,7 +79,7 @@ export default defineComponent({
 
     //need an onmounted hook because this component isn't yet mounted when wallet/cluster are set
     onMounted(async () => {
-      if (wallet && getConnection()) {
+      if (wallet.value && getConnection()) {
         gf = await initGemFarm(getConnection(), wallet.value as any);
       }
 
@@ -102,16 +95,7 @@ export default defineComponent({
       return Object.keys(farmer.state)[0];
     };
 
-    const refreshFarmer = async () => {
-      await gf.refreshFarmerWallet(
-        new PublicKey(props.farm!),
-        new PublicKey(props.farmer!)
-      );
-      ctx.emit('refresh-farmer');
-    };
-
     return {
-      refreshFarmer,
       parseFarmerState,
       magicEdenFloor,
       solPrice,

@@ -3,25 +3,40 @@
     <!--control buttons-->
     <div class="mb-5 flex justify-center">
       <button
-        v-if="
-          (toWalletNFTs && toWalletNFTs.length) ||
-          (toVaultNFTs && toVaultNFTs.length)
-          "
-        class="is-primary mr-5 primary"
-        @click="moveNFTsOnChain"
+        v-if="farmerState === 'unstaked' && farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000) && currentVaultNFTs.length > 0"
+        class="is-success mr-5 primary"
+        @click="beginStaking"
       >
-        Save Changes
+        {{STAKE_NAME}} {{NFT_SHORT_NAME}}
       </button>
-      <slot />
+      <button
+        v-if="farmerState === 'staked'"
+        class="is-error mr-5 primary"
+        @click="endStaking"
+      >
+        {{UNSTAKE_NAME}} {{NFT_SHORT_NAME}}
+      </button>
+      <button
+        v-if="farmerState === 'pendingCooldown' && farmerAcc.cooldownEndsTs < this.currentTS / 1000"
+        class="is-error mr-5 primary"
+        @click="endStaking"
+      >
+        Retrieve {{NFT_SHORT_NAME}}
+      </button>
+      <button class="primary claim" @click="claimRewards" :disabled="farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) < 1">
+        Claim {{Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0 ? Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) : "")}} ${{SPL_TOKEN_NAME}}
+      </button>
     </div>
 
     <!--Vault-->
     <NFTGrid
       v-if="bank && vault"
       :title="VAULT_NAME"
+      :loading="vaultLoading"
       :emptyMessage="'Your ' + VAULT_NAME.toLowerCase() + ' is empty'"
       class="mb-4 relative"
-      :nfts="desiredVaultNFTs"
+      :nfts="currentVaultNFTs"
+      :disabled="vaultLocked"
       @selected="handleVaultNFTSelected"
     >
       <div
@@ -44,7 +59,7 @@
 
     <!--mid-->
     <div class="mb-5 flex justify-center">
-      <button :disabled="vaultLocked" class="my-2 mr-2 inline-block primary" @click="moveNFTsToVault(true)">
+      <button :disabled="vaultLocked || currentWalletNFTs.length == 0" class="my-2 mr-2 inline-block primary" @click="moveNFTsToVault(true)">
         <span class="inline-block">Move All</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
@@ -62,7 +77,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
         </svg>
       </button> 
-      <button :disabled="vaultLocked" class="my-2 inline-block primary" :left="true" @click="moveNFTsBackToWallet(true)">
+      <button :disabled="vaultLocked || currentVaultNFTs.length == 0" class="my-2 inline-block primary" :left="true" @click="moveNFTsBackToWallet(true)">
         <span class="inline-block">Return All</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
@@ -72,12 +87,24 @@
 
     <!--Wallet-->
     <NFTGrid
+      v-if="bank && vault"
       title="Wallet"
+      :loading="walletLoading"
       :emptyMessage="'Your wallet contains no ' + NFT_SHORT_NAME"
-      class="flex-1"
-      :nfts="desiredWalletNFTs"
+      class="relative"
+      :nfts="currentWalletNFTs"
+      :disabled="vaultLocked"
       @selected="handleWalletNFTSelected"
-    />
+    >
+      <div
+        v-if="vaultLocked && farmerState == 'staked'"
+        class="locked flex-col justify-center items-center align-center"
+      >
+        <p class="mt-5 text-indigo-200" style="text-shadow: 1px 1px 1px black">
+          <span>You must {{UNSTAKE_NAME.toLowerCase()}} your {{NFT_SHORT_NAME}} before you can {{STAKE_NAME.toLowerCase()}} more.</span>
+        </p>
+      </div>
+    </NFTGrid>
   </div>
 </template>
 
@@ -93,10 +120,11 @@ import {
 } from '@/common/web3/NFTget';
 import { initGemBank } from '@/common/gem-bank';
 import { PublicKey } from '@solana/web3.js';
-import { getListDiffBasedOnMints, removeManyFromList } from '@/common/util';
 import { BN } from '@project-serum/anchor';
 import { parseDate } from '@/common/util';
-import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, COOLING_DOWN_NAME, SPL_TOKEN_NAME, UNSTAKE_NAME } from '@/common/config'
+import { useToast } from 'vue-toastification';
+import { useLoading } from 'vue-loading-overlay';
+import { VAULT_NAME, VAULT_ICON, WALLET_NFT_CREATOR_FILTER, NFT_SHORT_NAME, NFT_SHORT_NAME_SINGULAR, COOLING_DOWN_NAME, SPL_TOKEN_NAME, STAKE_NAME, UNSTAKE_NAME } from '@/common/config'
 
 export default defineComponent({
   components: { NFTGrid },
@@ -110,60 +138,66 @@ export default defineComponent({
   props: {
     vault: String,
     farmerState: String,
+    farmAcc: Object,
+    farmerAcc: Object,
     cooldownEndsTs: Object,
     eventIsActive: Boolean
   },
-  emits: ['selected-wallet-nft'],
+  emits: ['selected-wallet-nft', 'begin-staking', 'end-staking', 'claim-rewards'],
   setup(props, ctx) {
     const { wallet } = useWallet();
     const { cluster, getConnection } = useCluster();
+    const toast = useToast();
+    const loader = useLoading({ color: '#4f46e5', loader: 'bars'});
 
     // --------------------------------------- state
 
     //current walet/vault state
     const currentWalletNFTs = ref<INFT[]>([]);
     const currentVaultNFTs = ref<INFT[]>([]);
+    
     //selected but not yet moved over in FE
     const selectedWalletNFTs = ref<INFT[]>([]);
     const selectedVaultNFTs = ref<INFT[]>([]);
-    //moved over in FE but not yet onchain
-    const desiredWalletNFTs = ref<INFT[]>([]);
-    const desiredVaultNFTs = ref<INFT[]>([]);
-    //moved over onchain
-    const toWalletNFTs = ref<INFT[]>([]);
-    const toVaultNFTs = ref<INFT[]>([]);
 
     // --------------------------------------- populate initial nfts
 
     const populateWalletNFTs = async () => {
+      walletLoading.value = true;
+
       // zero out to begin with
       currentWalletNFTs.value = [];
       selectedWalletNFTs.value = [];
-      desiredWalletNFTs.value = [];
 
       if (wallet) {
         const allWalletNFTs = await getNFTsByOwner(
           wallet.value!.publicKey!,
           getConnection()
         )
-        console.log("wallet nfts: ", allWalletNFTs);
-        const filteredNFTs = allWalletNFTs.filter((nft: INFT) => 
+        const filteredNFTs = allWalletNFTs
+          .filter((nft: INFT) => 
             (nft.onchainMetadata as any).data
             && (nft.onchainMetadata as any).data.creators
             && (nft.onchainMetadata as any).data.creators.length > 0 
             && (nft.onchainMetadata as any).data.creators[0].address == WALLET_NFT_CREATOR_FILTER.toString()
-        )
-        console.log("filtered nfts: ", filteredNFTs);
+          )
+          .sort((nftA: INFT, nftB: INFT) => { 
+            const nameA = (nftA.externalMetadata as any).name;
+            const nameB = (nftB.externalMetadata as any).name;
+            return nameA.localeCompare(nameB)
+          })
+        console.log("filtered wallet nfts: ", filteredNFTs);
         currentWalletNFTs.value = filteredNFTs
-        desiredWalletNFTs.value = [...currentWalletNFTs.value];
       }
+      walletLoading.value = false;
     };
 
     const populateVaultNFTs = async () => {
+      vaultLoading.value = true;
+
       // zero out to begin with
       currentVaultNFTs.value = [];
       selectedVaultNFTs.value = [];
-      desiredVaultNFTs.value = [];
 
       const foundGDRs = await gb.fetchAllGdrPDAs(vault.value);
       if (foundGDRs && foundGDRs.length) {
@@ -173,21 +207,24 @@ export default defineComponent({
         const mints = foundGDRs.map((gdr: any) => {
           return { mint: gdr.account.gemMint };
         });
-        currentVaultNFTs.value = await getNFTMetadataForMany(
+        const vaultNFTs = await getNFTMetadataForMany(
           mints,
           getConnection()
         );
-        desiredVaultNFTs.value = [...currentVaultNFTs.value];
-        console.log(
-          `populated a total of ${currentVaultNFTs.value.length} vault NFTs`
-        );
+        const sortedVaultNFTs = vaultNFTs.sort((nftA: INFT, nftB: INFT) => { 
+          const nameA = (nftA.externalMetadata as any).name;
+          const nameB = (nftB.externalMetadata as any).name;
+          return nameA.localeCompare(nameB)
+        });
+        currentVaultNFTs.value = sortedVaultNFTs
+        console.log("sorted vault NFTs", sortedVaultNFTs);
       }
+      vaultLoading.value = false;
     };
 
     const updateVaultState = async () => {
       vaultAcc.value = await gb.fetchVaultAcc(vault.value);
       bank.value = vaultAcc.value.bank;
-      console.log(vaultAcc.value);
       vaultLocked.value = vaultAcc.value.locked;
     };
 
@@ -220,6 +257,18 @@ export default defineComponent({
       }
       ctx.emit('selected-wallet-nft', selectedWalletNFTs.value);
     };
+    
+    const beginStaking = (e: any) => {
+      ctx.emit('begin-staking');
+    }
+    
+    const endStaking = (e: any) => {
+      ctx.emit('end-staking');
+    }
+
+    const claimRewards = (e: any) => {
+      ctx.emit('claim-rewards');
+    }
 
     const handleVaultNFTSelected = (e: any) => {
       if (e.selected) {
@@ -232,17 +281,11 @@ export default defineComponent({
 
     const moveNFTsToVault = (all: boolean) => {
       if (all) {
-        //push all wallet nfts into desired vault
-        desiredVaultNFTs.value.push(...currentWalletNFTs.value);
-        desiredVaultNFTs.value.push(...desiredWalletNFTs.value);
-        //remove current wallet nfts from desired wallet
-        removeManyFromList(currentWalletNFTs.value, desiredWalletNFTs.value);
-        removeManyFromList(desiredVaultNFTs.value, desiredWalletNFTs.value);
+        //push all wallet nfts into vault
+        moveNFTsOnChain(currentWalletNFTs.value, []);
       } else {
-        //push selected wallet nfts into desired vault
-        desiredVaultNFTs.value.push(...selectedWalletNFTs.value);
-        //remove selected wallet nfts from desired wallet
-        removeManyFromList(selectedWalletNFTs.value, desiredWalletNFTs.value);
+        //push selected wallet nfts into vault
+        moveNFTsOnChain(selectedWalletNFTs.value, []);
       }
       //empty selected wallet
       selectedWalletNFTs.value = [];
@@ -250,64 +293,55 @@ export default defineComponent({
 
     const moveNFTsBackToWallet = (all: boolean) => {
       if (all) {
-        //push selected vault nfts into desired wallet
-        desiredWalletNFTs.value.push(...currentVaultNFTs.value);
-        desiredWalletNFTs.value.push(...desiredVaultNFTs.value);
-        //remove selected vault nfts from desired vault
-        removeManyFromList(currentVaultNFTs.value, desiredVaultNFTs.value);
-        removeManyFromList(desiredWalletNFTs.value, desiredVaultNFTs.value);
+        //push selected vault nfts into wallet
+        moveNFTsOnChain([], currentVaultNFTs.value);
       } else {
-        //push selected vault nfts into desired wallet
-        desiredWalletNFTs.value.push(...selectedVaultNFTs.value);
-        //remove selected vault nfts from desired vault
-        removeManyFromList(selectedVaultNFTs.value, desiredVaultNFTs.value);
+        //push selected vault nfts into wallet
+        moveNFTsOnChain([], selectedVaultNFTs.value);
       }
       //empty selection list
       selectedVaultNFTs.value = [];
     };
 
     //todo jam into single tx
-    const moveNFTsOnChain = async () => {
-      for (const nft of toVaultNFTs.value) {
+    const moveNFTsOnChain = async (toVaultNFTs: INFT[], toWalletNFTs: INFT[]) => {
+      const ld = loader.show();
+      let allSucceeded = true;
+      for (const nft of toVaultNFTs) {
         console.log(nft);
         const creator = new PublicKey(
           //todo currently simply taking the 1st creator
           (nft.onchainMetadata as any).data.creators[0].address
         );
         console.log('creator is', creator.toBase58());
-        await depositGem(nft.mint, creator, nft.pubkey!);
+        try {
+          await depositGem(nft.mint, creator, nft.pubkey!);
+        } catch (error) {
+          allSucceeded = false;
+          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to ${VAULT_NAME}: ${error.message}`);
+        }
       }
-      for (const nft of toWalletNFTs.value) {
-        await withdrawGem(nft.mint);
+      if (toVaultNFTs.length > 0 && allSucceeded) {
+        toast.success(`${NFT_SHORT_NAME_SINGULAR} moved to ${VAULT_NAME}`);
       }
-      await Promise.all([populateWalletNFTs(), populateVaultNFTs()]);
+      allSucceeded = true
+      for (const nft of toWalletNFTs) {
+        try {
+          await withdrawGem(nft.mint);
+        } catch (error) {
+          allSucceeded = false;
+          toast.error(`Failed to move ${NFT_SHORT_NAME_SINGULAR} to wallet: ${error.message}`);
+        }
+      }
+      if (toWalletNFTs.length > 0 && allSucceeded) {
+        toast.success(`${NFT_SHORT_NAME_SINGULAR} returned to wallet`);
+      }
+      ld.hide()
+      
+      setTimeout(async function() {
+        await Promise.all([populateWalletNFTs(), populateVaultNFTs()]);
+      }, 100)
     };
-
-    //to vault = vault desired - vault current
-    watch(
-      desiredVaultNFTs,
-      () => {
-        toVaultNFTs.value = getListDiffBasedOnMints(
-          desiredVaultNFTs.value,
-          currentVaultNFTs.value
-        );
-        console.log('to vault nfts are', toVaultNFTs.value);
-      },
-      { deep: true }
-    );
-
-    //to wallet = wallet desired - wallet current
-    watch(
-      desiredWalletNFTs,
-      () => {
-        toWalletNFTs.value = getListDiffBasedOnMints(
-          desiredWalletNFTs.value,
-          currentWalletNFTs.value
-        );
-        console.log('to wallet nfts are', toWalletNFTs.value);
-      },
-      { deep: true }
-    );
 
     // --------------------------------------- gem bank
 
@@ -316,7 +350,9 @@ export default defineComponent({
     const vault = ref<PublicKey>();
     const vaultAcc = ref<any>();
     const gdrs = ref<PublicKey[]>([]);
-    const vaultLocked = ref<boolean>(false);
+    const vaultLocked = ref(false);
+    const vaultLoading = ref(true);
+    const walletLoading = ref(true);
 
     const depositGem = async (
       mint: PublicKey,
@@ -349,19 +385,21 @@ export default defineComponent({
     return {
       currentTS: Date.now(),
       wallet,
-      desiredWalletNFTs,
-      desiredVaultNFTs,
-      toVaultNFTs,
-      toWalletNFTs,
       handleWalletNFTSelected,
       handleVaultNFTSelected,
       moveNFTsToVault,
       moveNFTsBackToWallet,
-      moveNFTsOnChain,
+      beginStaking,
+      endStaking,
+      claimRewards,
       bank,
       // eslint-disable-next-line vue/no-dupe-keys
       vault,
       vaultLocked,
+      vaultLoading,
+      walletLoading,
+      currentWalletNFTs,
+      currentVaultNFTs,
       selectedWalletNFTs,
       selectedVaultNFTs,
       parseDate,
@@ -370,6 +408,7 @@ export default defineComponent({
       NFT_SHORT_NAME,
       COOLING_DOWN_NAME,
       SPL_TOKEN_NAME,
+      STAKE_NAME,
       UNSTAKE_NAME
     };
   },
@@ -379,12 +418,15 @@ export default defineComponent({
 <style scoped>
 .locked {
   @apply text-center bg-black text-white;
-  width: 100%;
-  height: 100%;
   position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0.5;
+  top: 10px;
+  right: 10px;
+  opacity: 0.65;
   z-index: 10;
+  padding: 10px 15px;
+  border-radius: 30px;
+}
+.locked p {
+  margin-top: 0;
 }
 </style>

@@ -26,8 +26,9 @@
     "solana-wallets-vue": "^0.3.1",
     "tweetnacl": "^1.0.3",
     "vue": "^3.2.31",
+    "vue-loading-overlay": "^5.0",
     "vue-router": "^4.0.0-0",
-    "vue-toast-notification": "^3.0.0"
+    "vue-toastification": "^2.0.0-rc.5"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",

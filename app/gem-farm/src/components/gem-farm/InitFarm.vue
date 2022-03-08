@@ -84,7 +84,7 @@ export default defineComponent({
 
     //needed coz mounts later
     onMounted(async () => {
-      if (wallet && getConnection()) {
+      if (wallet.value && getConnection()) {
         gf = await initGemFarm(getConnection(), wallet.value as any);
       }
     });
