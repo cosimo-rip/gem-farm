@@ -17,7 +17,7 @@
         <label class="text-sm">
         Total Minimum Value Locked
         </label><br />
-        <span v-if="farmAcc && magicEdenFloor && solPrice" class="font-semibold text-indigo-600 text-3xl">${{ (Math.floor((parseInt(farmAcc.gemsStaked) * magicEdenFloor * solPrice) * 100))/100 }}</span>
+        <span v-if="farmAcc && magicEdenFloor && solPrice" class="font-semibold text-indigo-600 text-3xl">${{ Math.floor((((parseInt(farmAcc.gemsStaked) * magicEdenFloor * solPrice) * 100))/100).toLocaleString() }}</span>
         <span v-else class="font-semibold text-indigo-600 text-3xl">–</span><br />
         <span v-if="farmAcc && magicEdenFloor && solPrice" class="text-xs italic text-gray-400">based on {{magicEdenFloor}} SOL floor</span>
       </span>
@@ -38,7 +38,7 @@
         <label class="text-sm">
         ${{SPL_TOKEN_NAME}} Redeemed
         </label><br />
-        <span class="font-semibold text-indigo-600 text-3xl">{{ farmAcc.rewardA.funds.totalAccruedToStakers }}</span><br />
+        <span class="font-semibold text-indigo-600 text-3xl">{{ parseInt(farmAcc.rewardA.funds.totalAccruedToStakers ?? 0).toLocaleString() }}</span><br />
         <span class="text-xs italic text-gray-400">by all {{NFT_SHORT_NAME_SINGULAR}} holders to date</span>
       </span>
     </div>
