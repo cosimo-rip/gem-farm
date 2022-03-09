@@ -198,6 +198,16 @@ export default defineComponent({
       gf = await initGemFarm(connection, wallet);
       farmerIdentity.value = wallet.publicKey?.toBase58();
 
+      // debugging code to capture snapshot of all wallets w/plots
+
+      // const farmerPDAs = await fetchAllFarmerPDAs(new PublicKey(ACTIVE_FARM_ID), undefined);
+      // console.log(farmerPDAs);
+      // const idPromises = farmerPDAs.map(async f => gf.fetchFarmerAcc(f.publicKey));
+      // Promise.all(idPromises).then(function(results) {
+      //   const ids = results.map((r: any) => r.identity.toString());
+      //   console.log(ids)
+      // })
+
       //reset stuff
       farmAcc.value = undefined;
       farmerAcc.value = undefined;
@@ -276,6 +286,30 @@ export default defineComponent({
       }
       ld.hide();
     };
+
+    const fetchAllFarmerPDAs = async (farm?: PublicKey, identity?: PublicKey) => {
+        const filter: any = [];
+
+        if (farm) {
+            filter.push({
+                memcmp: {
+                    offset: 8, //need to prepend 8 bytes for anchor's disc
+                    bytes: farm.toBase58(),
+                },
+            });
+        }
+
+        if (identity) {
+            filter.push({
+                memcmp: {
+                    offset: 40, // need to prepend 8 bytes for anchor's disc
+                    bytes: identity.toBase58(),
+                },
+            });
+        }
+
+        return gf.farmProgram.account.farmer.all(filter);
+    }
 
     return {
       currentTS: Date.now(),
