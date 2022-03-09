@@ -4,7 +4,8 @@
       {{WELCOME_MSG}} Earn <strong>{{ (86400 / schedule.denominator) * schedule.baseRate }} ${{SPL_TOKEN_NAME}} per day</strong> for each item {{STAKED_NAME.toLowerCase()}} in this {{VAULT_NAME.toLowerCase()}}.<br />
       <span class="italic text-xs">Rules &amp; Disclaimers: ${{SPL_TOKEN_NAME}} has no monetary value. Stake at your own risk. Unstaking: It takes the {{UNSTAKE_CHARACTER.toLowerCase()}} {{ parseTime(farmAcc.config.cooldownPeriodSec) }} to {{UNSTAKE_NAME.toLowerCase()}} {{STAKED_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}, and {{UNSTAKE_CHARACTER_PRONOUN.toLowerCase()}} charges a {{ farmAcc.config.unstakingFeeLamp / LAMPORTS_PER_SOL }} SOL fee.</span><br />
       <br />
-      <div v-if="eventIsActive"><strong>Current Staking Event Ends:</strong> {{parseDate(parseInt(farmerReward.fixedRate.beginScheduleTs) + parseInt(farmerReward.fixedRate.promisedDuration))}}</div>
+      
+      <div v-if="eventIsActive"><strong>Current Staking Event Ends:</strong> {{parseDate(farmAcc.rewardA.times.rewardEndTs)}}</div>
       <div v-else><strong>Current Staking Event Has Ended</strong></div>
     </div>
     <div v-else>
@@ -49,7 +50,6 @@ import { WELCOME_MSG, VAULT_NAME, SPL_TOKEN_NAME, NFT_SHORT_NAME, STAKED_NAME, U
 
 export default defineComponent({
   props: {
-    farmerReward: Object,
     schedule: Object,
     farmAcc: Object,
     isFrontend: Boolean,
