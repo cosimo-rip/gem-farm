@@ -23,9 +23,10 @@
           <div class="h-full bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
             <FarmerRewardDisplay
               :key="farmerAcc.rewardA"
+              :farmReward="farmAcc.rewardA"
               :farmerReward="farmerAcc.rewardA"
               :farmAcc="farmAcc"
-              :eventIsActive="farmerAcc.rewardA.fixedRate.beginScheduleTs + farmerAcc.rewardA.fixedRate.promisedDuration > (this.currentTS / 1000)"
+              :eventIsActive="(parseInt(farmerAcc.rewardA.fixedRate.beginScheduleTs) > 0 ? farmerAcc.rewardA.fixedRate.beginScheduleTs + farmerAcc.rewardA.fixedRate.promisedDuration : farmAcc.rewardA.times.rewardEndTs) > (this.currentTS / 1000)"
             />
             <FarmerDisplay
               :key="farmerAcc"
@@ -42,7 +43,7 @@
               :farmAcc="farmAcc"
               :farmerAcc="farmerAcc"
               :cooldownEndsTs="farmerAcc.cooldownEndsTs"
-              :eventIsActive="farmerAcc.rewardA.fixedRate.beginScheduleTs + farmerAcc.rewardA.fixedRate.promisedDuration > (this.currentTS / 1000)"
+              :eventIsActive="(parseInt(farmerAcc.rewardA.fixedRate.beginScheduleTs) > 0 ? farmerAcc.rewardA.fixedRate.beginScheduleTs + farmerAcc.rewardA.fixedRate.promisedDuration : farmAcc.rewardA.times.rewardEndTs) > (this.currentTS / 1000)"
               @begin-staking="beginStaking"
               @end-staking="endStaking"
               @claim-rewards="claimRewards"

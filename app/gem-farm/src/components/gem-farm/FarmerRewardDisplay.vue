@@ -1,9 +1,10 @@
 <template>
     <div>
       <FixedScheduleDisplay
-        :key="farmerReward"
+        :key="farmReward"
+        :farmReward="farmReward"
         :farmerReward="farmerReward"
-        :schedule="farmerReward.fixedRate.promisedSchedule"
+        :schedule="farmerReward.fixedRate.promisedSchedule.baseRate > 0 ? farmerReward.fixedRate.promisedSchedule : farmReward.fixedRate.schedule"
         :farmAcc="farmAcc"
         :isFrontend="true"
         :eventIsActive="eventIsActive"
@@ -21,6 +22,7 @@ export default defineComponent({
   components: { FixedScheduleDisplay },
   props: {
     reward: Object,
+    farmReward: Object,
     farmerReward: Object,
     title: String,
     farmAcc: Object,
