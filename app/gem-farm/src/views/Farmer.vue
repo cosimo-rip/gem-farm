@@ -24,9 +24,8 @@
             <FarmerRewardDisplay
               :key="farmerAcc.rewardA"
               :farmReward="farmAcc.rewardA"
-              :farmerReward="farmerAcc.rewardA"
               :farmAcc="farmAcc"
-              :eventIsActive="(parseInt(farmerAcc.rewardA.fixedRate.beginScheduleTs) > 0 ? farmerAcc.rewardA.fixedRate.beginScheduleTs + farmerAcc.rewardA.fixedRate.promisedDuration : farmAcc.rewardA.times.rewardEndTs) > (this.currentTS / 1000)"
+              :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
             />
             <FarmerDisplay
               :key="farmerAcc"
@@ -43,7 +42,7 @@
               :farmAcc="farmAcc"
               :farmerAcc="farmerAcc"
               :cooldownEndsTs="farmerAcc.cooldownEndsTs"
-              :eventIsActive="(parseInt(farmerAcc.rewardA.fixedRate.beginScheduleTs) > 0 ? farmerAcc.rewardA.fixedRate.beginScheduleTs + farmerAcc.rewardA.fixedRate.promisedDuration : farmAcc.rewardA.times.rewardEndTs) > (this.currentTS / 1000)"
+              :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
               @begin-staking="beginStaking"
               @end-staking="endStaking"
               @claim-rewards="claimRewards"

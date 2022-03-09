@@ -27,6 +27,7 @@
         Claim {{Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator) > 0 ? Math.floor(farmerAcc.rewardA.accruedReward - farmerAcc.rewardA.paidOutReward + (parseInt(farmerAcc.gemsStaked) * (Math.round(this.currentTS/1000) - farmerAcc.rewardA.fixedRate.lastUpdatedTs) * farmAcc.rewardA.fixedRate.schedule.baseRate / farmAcc.rewardA.fixedRate.schedule.denominator)) : "")}} ${{SPL_TOKEN_NAME}}
       </button>
     </div>
+
     <!--Vault-->
     <NFTGrid
       v-if="bank && vault"
