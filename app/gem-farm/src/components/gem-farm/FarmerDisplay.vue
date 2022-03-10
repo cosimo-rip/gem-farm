@@ -52,7 +52,6 @@ import FarmerRewardDisplay from '@/components/gem-farm/FarmerRewardDisplay.vue';
 import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
-import { PublicKey } from '@solana/web3.js';
 import { parseDate } from '@/common/util';
 import { NFT_SHORT_NAME, NFT_SHORT_NAME_SINGULAR, STAKED_NAME, VAULT_NAME, SPL_TOKEN_NAME, TOTAL_NFTS_COUNT } from '@/common/config'
 import axios from 'axios';
