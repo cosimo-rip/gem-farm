@@ -6,7 +6,8 @@
       <span class="disclaimer italic text-xs">Disclaimer: ${{SPL_TOKEN_NAME}} has no monetary value. Stake at your own risk.</span><br />
       <br />
 
-      <span class="instructions text-indigo-700">
+      <a id="help" @click="showInstructions" :class="{ 'hidden': instructionsShown }" class="block cursor-help text-indigo-500 text-lg mb-4">Need Help? Click Here for instructions.</a>
+      <span id="instructions" class="text-indigo-700" :class="{ 'hidden': !instructionsShown }">
         <strong>Instructions:</strong><br />
         <ol>
           <li>Move {{NFT_SHORT_NAME}} to your {{VAULT_NAME}}</li>
@@ -17,8 +18,8 @@
             <span class="text-sm">It takes the {{UNSTAKE_CHARACTER.toLowerCase()}} {{ parseTime(farmAcc.config.cooldownPeriodSec) }} to {{UNSTAKE_NAME.toLowerCase()}} {{STAKED_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}. {{UNSTAKE_CHARACTER_PRONOUN}} charges a {{ farmAcc.config.unstakingFeeLamp / LAMPORTS_PER_SOL }} SOL fee.</span>
           </li>
         </ol>
+        <br />
       </span>
-      <br />
       
       <div class="text-sm md:text-base">
       <div v-if="eventIsActive"><strong>Current Staking Event Ends:</strong> {{parseDate(farmAcc.rewardA.times.rewardEndTs)}}</div>
@@ -60,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { parseDate } from '@/common/util';
 import { WELCOME_MSG, VAULT_NAME, SPL_TOKEN_NAME, NFT_SHORT_NAME, STAKE_NAME, STAKED_NAME, UNSTAKE_CHARACTER, UNSTAKE_CHARACTER_PRONOUN, UNSTAKE_NAME, UNSTAKED_NAME } from '@/common/config';
@@ -73,6 +74,7 @@ export default defineComponent({
     eventIsActive: Boolean
   },
   setup() {
+    const instructionsShown = ref(false);
 
     const parseTime = (seconds: number) => {
       const MINS_IN_SECS = 60;
@@ -94,8 +96,14 @@ export default defineComponent({
       return days + (days == 1 ? ' day' : ' days');
     };
 
+    const showInstructions = (e: any) => {
+      instructionsShown.value = true;
+    }
+
     return {
       parseTime,
+      showInstructions,
+      instructionsShown,
       parseDate,
       LAMPORTS_PER_SOL,
       WELCOME_MSG, 
