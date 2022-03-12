@@ -116,9 +116,9 @@ body {
   }
 
   .locked {
-    max-width: 225px;
+    max-width: 200px;
     font-size: 12px;
-    padding: 5px 10px;
+    padding: 5px;
     line-height: 1.2em;
   }
 
