@@ -109,19 +109,22 @@ body {
   padding-right: 12px;
 }
 
-.desktop {
-  display: block;
-}
-
-.mobile {
-  display: none;
-}
-
 @media only screen and (max-width: 760px) {
-  .mobile {
+  .locked {
+    max-width: 225px;
+    font-size: 12px;
+    padding: 5px 10px;
+    line-height: 1.2em;
+  }
+
+  #controlbuttons {
+    width: 100%;
     display: block;
   }
-  .desktop {
-    display: none;
+
+  #controlbuttons button {
+    display: block;
+    width: 90%;
+    margin: 0 auto 0.5em auto;
   }
 }

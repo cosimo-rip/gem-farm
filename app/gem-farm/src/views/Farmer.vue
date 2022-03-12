@@ -6,78 +6,71 @@
       <ConfigPane />
     </div>
 
-    <div class="desktop">
-      <div v-if="!wallet">
-        <div class="text-center h-full flex bg-gray-200" style="min-height: calc(100vh - 150px)">
-          <div class="m-auto">
-            <div class="text-center mb-5">Connect your wallet to begin</div>
+    <div v-if="!wallet">
+      <div class="text-center h-full flex bg-gray-200" style="min-height: calc(100vh - 150px)">
+        <div class="m-auto">
+          <div class="text-center mb-5">Connect your wallet to begin</div>
 
-            <div class="text-center mx-auto inline-block">
-              <ConfigPane />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-else class="relative">
-        <div v-if="farmerAcc">
-          <div class="h-full bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
-            <FarmerRewardDisplay
-              :key="farmerAcc.rewardA"
-              :farmReward="farmAcc.rewardA"
-              :farmAcc="farmAcc"
-              :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
-            />
-            <FarmerDisplay
-              :key="farmerAcc"
-              :farm="farm"
-              :farmAcc="farmAcc"
-              :farmer="farmer"
-              :farmerAcc="farmerAcc"
-            />
-            <Vault
-              :key="farmerAcc"
-              class="mb-10"
-              :vault="farmerAcc.vault.toBase58()"
-              :farmerState="farmerState"
-              :farmAcc="farmAcc"
-              :farmerAcc="farmerAcc"
-              :cooldownEndsTs="farmerAcc.cooldownEndsTs"
-              :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
-              @begin-staking="beginStaking"
-              @end-staking="endStaking"
-              @claim-rewards="claimRewards"
-            />
-          </div>
-
-
-        </div>
-        <div v-else>
-          <div class="text-center h-full flex bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
-            <div class="m-auto">
-              <div v-if="fetchingFarmFailed">
-                Connection Issues. Please reload and try again.
-              </div>
-              <div v-else-if="loading">
-                Loading...
-              </div>
-              <div v-else>
-                <div class="w-full text-center mb-5">
-                  Before you can {{STAKE_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}, you'll need a {{VAULT_NAME.toLowerCase()}}.
-                </div>
-                <div class="w-full text-center">
-                  <button class="is-primary primary text-center" @click="initFarmer">
-                    New {{VAULT_NAME}}
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div class="text-center mx-auto inline-block">
+            <ConfigPane />
           </div>
         </div>
       </div>
     </div>
-    <div class="mobile">
-      <div class="text-center h-full flex bg-gray-200" style="min-height: calc(100vh - 150px)">
-        <p class="max-w-xs mx-auto mt-40">We're Sorry!<br /><br />Staking is not currently supported<br />on mobile devices.</p>
+    <div v-else class="relative">
+      <div v-if="farmerAcc">
+        <div class="h-full bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
+          <FarmerRewardDisplay
+            :key="farmerAcc.rewardA"
+            :farmReward="farmAcc.rewardA"
+            :farmAcc="farmAcc"
+            :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
+          />
+          <FarmerDisplay
+            :key="farmerAcc"
+            :farm="farm"
+            :farmAcc="farmAcc"
+            :farmer="farmer"
+            :farmerAcc="farmerAcc"
+          />
+          <Vault
+            :key="farmerAcc"
+            class="mb-10"
+            :vault="farmerAcc.vault.toBase58()"
+            :farmerState="farmerState"
+            :farmAcc="farmAcc"
+            :farmerAcc="farmerAcc"
+            :cooldownEndsTs="farmerAcc.cooldownEndsTs"
+            :eventIsActive="farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000)"
+            @begin-staking="beginStaking"
+            @end-staking="endStaking"
+            @claim-rewards="claimRewards"
+          />
+        </div>
+
+
+      </div>
+      <div v-else>
+        <div class="text-center h-full flex bg-gray-200 p-5" style="min-height: calc(100vh - 150px)">
+          <div class="m-auto">
+            <div v-if="fetchingFarmFailed">
+              Connection Issues. Please reload and try again.
+            </div>
+            <div v-else-if="loading">
+              Loading...
+            </div>
+            <div v-else>
+              <div class="w-full text-center mb-5">
+                Before you can {{STAKE_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}, you'll need a {{VAULT_NAME.toLowerCase()}}.
+              </div>
+              <div class="w-full text-center">
+                <button class="is-primary primary text-center" @click="initFarmer">
+                  New {{VAULT_NAME}}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
