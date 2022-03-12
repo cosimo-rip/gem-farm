@@ -109,10 +109,19 @@ body {
   padding-right: 12px;
 }
 
+ol {
+  list-style-type: decimal;
+  margin-left: 1em;
+}
+
 @media only screen and (max-width: 760px) {
   #app > div {
     margin: 0;
     padding: 0;
+  }
+
+  .welcome {
+    display: block;
   }
 
   .locked {
