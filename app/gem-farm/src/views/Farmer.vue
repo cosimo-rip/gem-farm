@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h1 class="mb-4 w-60 md:w-auto h-8 md:h-4 text-xl md:text-4xl">{{PAGE_TITLE}}</h1>
+    <h1 class="mb-4 mt-4 ml-4 md:mb-4 md:mt-0 md:ml-0 w-60 md:w-auto h-9 md:h-8 md:h-4 text-xl md:text-4xl">{{PAGE_TITLE}}</h1>
 
-    <div v-if="wallet" class="absolute top-8 right-10 desktop">
+    <div v-if="wallet" class="absolute -top-1 right-4 md:right-10 md:top-8 desktop">
       <ConfigPane />
     </div>
 
