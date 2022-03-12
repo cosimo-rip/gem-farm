@@ -1,7 +1,7 @@
 <template>
   <div>
     <!--control buttons-->
-    <div class="mb-5 flex justify-center">
+    <div id="controlbuttons" class="mb-5 flex justify-center">
       <button
         v-if="farmerState === 'unstaked' && farmAcc.rewardA.times.rewardEndTs > (this.currentTS / 1000) && currentVaultNFTs.length > 0"
         class="is-success mr-5 primary"
