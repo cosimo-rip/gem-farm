@@ -3,7 +3,7 @@
     <div v-if="isFrontend" class="text-left text-gray-600 mb-6" style="max-width: 640px">
       <span class="welcome">{{WELCOME_MSG}}&nbsp;</span>
       <span class="earn">Earn <strong>{{ (86400 / schedule.denominator) * schedule.baseRate }} ${{SPL_TOKEN_NAME}} per day</strong> for each item {{STAKED_NAME.toLowerCase()}} in this {{VAULT_NAME.toLowerCase()}}.</span><br />
-      <span class="disclaimer italic text-xs">Disclaimer: ${{SPL_TOKEN_NAME}} has no monetary value. Stake at your own risk.</span><br />
+      <span class="disclaimer italic text-xs"><label>Disclaimer: </label>${{SPL_TOKEN_NAME}} has no monetary value. Stake at your own risk.</span><br />
       <br />
 
       <a id="help" @click="showInstructions" :class="{ 'hidden': instructionsShown }" class="block cursor-help text-indigo-500 text-lg mb-4">Need Help? Click Here for instructions.</a>

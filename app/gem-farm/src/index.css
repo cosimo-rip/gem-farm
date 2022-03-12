@@ -131,6 +131,10 @@ ol {
     line-height: 1.2em;
   }
 
+  .disclaimer label {
+    display: block;
+  }
+
   #controlbuttons {
     width: 100%;
     display: block;
