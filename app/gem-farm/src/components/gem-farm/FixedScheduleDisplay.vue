@@ -3,17 +3,19 @@
     <div v-if="isFrontend" class="text-left text-gray-600 mb-6" style="max-width: 640px">
       <span class="welcome">{{WELCOME_MSG}}&nbsp;</span>
       <span class="earn">Earn <strong>{{ (86400 / schedule.denominator) * schedule.baseRate }} ${{SPL_TOKEN_NAME}} per day</strong> for each item {{STAKED_NAME.toLowerCase()}} in this {{VAULT_NAME.toLowerCase()}}.</span><br />
-      <span class="disclaimer italic text-xs">Rules &amp; Disclaimers: ${{SPL_TOKEN_NAME}} has no monetary value. Stake at your own risk. Unstaking: It takes the {{UNSTAKE_CHARACTER.toLowerCase()}} {{ parseTime(farmAcc.config.cooldownPeriodSec) }} to {{UNSTAKE_NAME.toLowerCase()}} {{STAKED_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}, and {{UNSTAKE_CHARACTER_PRONOUN.toLowerCase()}} charges a {{ farmAcc.config.unstakingFeeLamp / LAMPORTS_PER_SOL }} SOL fee.</span><br />
+      <span class="disclaimer italic text-xs">Disclaimer: ${{SPL_TOKEN_NAME}} has no monetary value. Stake at your own risk.</span><br />
       <br />
 
       <span class="instructions text-indigo-700">
         <strong>Instructions:</strong><br />
         <ol>
-          <li>Move {{NFT_SHORT_NAME}} to your {{VAULT_NAME}};</li>
+          <li>Move {{NFT_SHORT_NAME}} to your {{VAULT_NAME}}</li>
           <li>{{STAKE_NAME}} them to start earning ${{SPL_TOKEN_NAME}}!<br />
-            <span class="text-sm">(The 0.00393 SOL rent is refunded when {{UNSTAKED_NAME.toLowerCase()}})</span>;      
+            <span class="text-sm">The 0.00393 SOL rent is refunded when {{UNSTAKED_NAME.toLowerCase()}}</span>      
           </li>
-          <li>To return {{NFT_SHORT_NAME}}, {{UNSTAKE_NAME.toLowerCase()}} your {{VAULT_NAME.toLowerCase()}}, retrieve them, and move them to your wallet.</li>
+          <li>To return {{NFT_SHORT_NAME}}: {{UNSTAKE_NAME.toLowerCase()}} them, retrieve them, and move them to your wallet.<br />
+            <span class="text-sm">It takes the {{UNSTAKE_CHARACTER.toLowerCase()}} {{ parseTime(farmAcc.config.cooldownPeriodSec) }} to {{UNSTAKE_NAME.toLowerCase()}} {{STAKED_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}. {{UNSTAKE_CHARACTER_PRONOUN}} charges a {{ farmAcc.config.unstakingFeeLamp / LAMPORTS_PER_SOL }} SOL fee.</span>
+          </li>
         </ol>
       </span>
       <br />
