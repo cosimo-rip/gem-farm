@@ -78,15 +78,18 @@ export default defineComponent({
       const DAYS_IN_SECS = 24 * HOURS_IN_SECS;
       
       if (seconds < MINS_IN_SECS) {
-        return seconds + ' seconds';
+        return seconds + (seconds == 1 ? ' second' : ' seconds');
       }
       if (seconds < HOURS_IN_SECS) {
-        return (seconds / MINS_IN_SECS) + ' minutes';
+        const minutes = (seconds / MINS_IN_SECS);
+        return minutes + (minutes == 1 ? ' minute' : ' minutes');
       }
       if (seconds < DAYS_IN_SECS) {
-        return (seconds / HOURS_IN_SECS) + ' hours';
+        const hours = (seconds / HOURS_IN_SECS);
+        return hours + (hours == 1 ? ' hour' : ' hours');
       }
-      return (seconds / DAYS_IN_SECS) + ' days';
+      const days = (seconds / DAYS_IN_SECS);
+      return days + (days == 1 ? ' day' : ' days');
     };
 
     return {
