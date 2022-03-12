@@ -110,6 +110,11 @@ body {
 }
 
 @media only screen and (max-width: 760px) {
+  #app > div {
+    margin: 0;
+    padding: 0;
+  }
+
   .locked {
     max-width: 225px;
     font-size: 12px;
@@ -124,7 +129,7 @@ body {
 
   #controlbuttons button {
     display: block;
-    width: 90%;
+    width: 60%;
     margin: 0 auto 0.5em auto;
   }
 }
