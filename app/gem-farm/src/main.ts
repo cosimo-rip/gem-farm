@@ -21,6 +21,8 @@ import {
   SlopeWalletAdapter,
   SolflareWalletAdapter,
   LedgerWalletAdapter,
+  SolletWalletAdapter,
+  SolletExtensionWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 
 const walletOptions = {
@@ -29,6 +31,8 @@ const walletOptions = {
     new SlopeWalletAdapter(),
     new SolflareWalletAdapter(),
     new LedgerWalletAdapter(),
+    new SolletWalletAdapter(),
+    new SolletExtensionWalletAdapter(),
   ],
   autoConnect: true,
 };
