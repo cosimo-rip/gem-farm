@@ -1,5 +1,5 @@
 import { readonly, ref } from 'vue';
-import { Commitment, Connection } from '@solana/web3.js';
+import { Commitment, Connection, ConnectionConfig } from '@solana/web3.js';
 
 export enum Cluster {
   Mainnet = 'mainnet',
@@ -21,7 +21,10 @@ export default function useCluster() {
   const getClusterURL = (): string => clusterURLMapping[cluster.value];
 
   const getConnection = (committment?: Commitment): Connection =>
-    new Connection(getClusterURL(), committment ?? 'processed');
+    new Connection(getClusterURL(), {
+      commitment: committment ?? 'processed',
+      confirmTransactionInitialTimeout: 90 * 1000,
+    } as ConnectionConfig);
 
   const setCluster = (newCluster: Cluster) => {
     cluster.value = newCluster;
