@@ -15,7 +15,7 @@
             <span class="text-sm">The 0.00393 SOL rent is refunded when {{UNSTAKED_NAME.toLowerCase()}}</span>      
           </li>
           <li>To return {{NFT_SHORT_NAME}}: {{UNSTAKE_NAME.toLowerCase()}} them, retrieve them, and move them to your wallet.<br />
-            <span class="text-sm">It takes the {{UNSTAKE_CHARACTER.toLowerCase()}} {{ parseTime(farmAcc.config.cooldownPeriodSec) }} to {{UNSTAKE_NAME.toLowerCase()}} {{STAKED_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}. {{UNSTAKE_CHARACTER_PRONOUN}} charges a {{ farmAcc.config.unstakingFeeLamp / LAMPORTS_PER_SOL }} SOL fee.</span>
+            <span class="text-sm">The {{UNSTAKE_CHARACTER.toLowerCase()}} charges a {{ farmAcc.config.unstakingFeeLamp / LAMPORTS_PER_SOL }} SOL fee to {{UNSTAKE_NAME.toLowerCase()}} {{STAKED_NAME.toLowerCase()}} {{NFT_SHORT_NAME}}.</span>
           </li>
         </ol>
         <br />
