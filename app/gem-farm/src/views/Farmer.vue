@@ -188,10 +188,54 @@ export default defineComponent({
       loadedWallet.value = wallet.publicKey.toString();
       loadedCluster.value = cluster;
 
-      gf = await initGemFarm(connection, wallet);
+      //
+      // CRANKING CODE
+      // NOTE: Configure `crankStartDate` to the date you update the farm
+      // NOTE: Configure `feepayer` private key to a real wallet with a small amount of SOL
+      //
+      let crankStartDate = 1649383200
+
+      const feepayer: any = new NodeWallet(
+        Keypair.fromSecretKey(
+          Uint8Array.from([
+            111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 
+            111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 
+            111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111, 111
+          ])
+        )
+      );
+
+      gf = await initGemFarm(connection, feepayer);
       farmerIdentity.value = wallet.publicKey?.toBase58();
 
-      // debugging code to capture snapshot of all wallets w/plots
+      const farmerPDAs = await fetchAllFarmerPDAs(new PublicKey(ACTIVE_FARM_ID), undefined);
+      const idPromises = farmerPDAs.map(async (f: any) => gf.fetchFarmerAcc(f.publicKey));
+
+      let cranking = false;
+
+      Promise.all(idPromises).then(async (results) => {
+        const uncranked = results.map((r: any) => {
+          const publicKey = r.identity.toString()
+          return { key: publicKey, lastUpdate: r.rewardA.fixedRate.lastUpdatedTs.toNumber(), r: r };
+        }).filter(r => r.lastUpdate < crankStartDate).filter(r => Object.keys(r.r.state)[0] == "unstaked")
+
+        console.log("still uncranked = " + uncranked.length);
+
+        if (!cranking) {
+          cranking = true;
+
+          for (let i=0; i<uncranked.length; i++) {
+            const toCrank = uncranked[i];
+            gf.refreshFarmerWallet(
+              new PublicKey(toCrank.key)
+            );
+          }
+        }
+      });
+      //
+      // END CRANKING CODE
+      //
+
 
       // const farmerPDAs = await fetchAllFarmerPDAs(new PublicKey(ACTIVE_FARM_ID), undefined);
       // console.log(farmerPDAs);
