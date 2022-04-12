@@ -19,11 +19,6 @@
         </ol>
         <br />
       </span>
-      
-      <div class="text-sm md:text-base">
-      <div v-if="eventIsActive"><strong>Current Staking Event Ends:</strong> {{parseDate(farmAcc.rewardA.times.rewardEndTs)}}</div>
-      <div v-else><strong>Current Staking Event Has Ended</strong></div>
-      </div>
     </div>
     <div v-else>
       <div class="mb-2">Base rate: {{ schedule.baseRate }} tokens/nft/s</div>
