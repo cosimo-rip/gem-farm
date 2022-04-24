@@ -7,7 +7,7 @@
         <label class="text-sm">
         {{NFT_SHORT_NAME}} {{STAKED_NAME.toLowerCase()}}
         </label><br />
-        <span class="font-semibold text-indigo-600 text-3xl">{{ Math.ceil(100 * (farmAcc.gemsStaked ?? 0) / TOTAL_NFTS_COUNT) }}%</span><br />
+        <span class="font-semibold text-indigo-600 text-3xl">{{ Math.round(100 * (farmAcc.gemsStaked ?? 0) / TOTAL_NFTS_COUNT) }}%</span><br />
         <span class="text-xs italic text-gray-400">{{ (farmAcc.gemsStaked ?? 0) }} of {{TOTAL_NFTS_COUNT}} possible</span>
       </span>
     </div>
