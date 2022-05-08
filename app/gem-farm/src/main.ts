@@ -1,5 +1,5 @@
 const log = console.log;
-const allow = false;
+const allow = true;
 console.log = (...params: any) => {
   if (allow) log(params);
 };
