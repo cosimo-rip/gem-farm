@@ -81,7 +81,7 @@ import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useWallet } from 'solana-wallets-vue'
 import useCluster from '@/composables/cluster';
 import { initGemFarm } from '@/common/gem-farm';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, Keypair } from '@solana/web3.js';
 import ConfigPane from '@/components/ConfigPane.vue';
 import FarmerDisplay from '@/components/gem-farm/FarmerDisplay.vue';
 import FarmerRewardDisplay from '@/components/gem-farm/FarmerRewardDisplay.vue'
@@ -89,6 +89,7 @@ import Vault from '@/components/gem-bank/Vault.vue';
 import { findFarmerPDA, stringifyPKsAndBNs } from '@gemworks/gem-farm-ts';
 import { useToast } from "vue-toastification";
 import { useLoading } from 'vue-loading-overlay';
+import { NodeWallet } from '@metaplex/js';
 import { PAGE_TITLE, VAULT_NAME, SPL_TOKEN_NAME, STAKE_NAME, STAKED_NAME, UNSTAKE_NAME, UNSTAKED_NAME, NFT_SHORT_NAME, ACTIVE_FARM_ID } from '@/common/config';
 
 export default defineComponent({
