@@ -216,9 +216,8 @@ export default defineComponent({
 
       Promise.all(idPromises).then(async (results) => {
         const uncranked = results.map((r: any) => {
-          const publicKey = r.identity.toString()
-          return { key: publicKey, lastUpdate: r.rewardA.fixedRate.lastUpdatedTs.toNumber(), r: r };
-        }).filter(r => r.lastUpdate < crankStartDate).filter(r => Object.keys(r.r.state)[0] == "unstaked")
+          return { farm: r.farm, farmerIdentity: r.identity, lastUpdate: r.rewardA.fixedRate.lastUpdatedTs.toNumber(), gemsStaked: r.gemsStaked.toNumber(), r: r };
+        }).filter(r => r.lastUpdate < crankStartDate && r.gemsStaked > 0)
 
         console.log("still uncranked = " + uncranked.length);
 
@@ -227,9 +226,8 @@ export default defineComponent({
 
           for (let i=0; i<uncranked.length; i++) {
             const toCrank = uncranked[i];
-            gf.refreshFarmerWallet(
-              new PublicKey(toCrank.key)
-            );
+            console.log("cranking " + toCrank.farmerIdentity.toString());
+            gf.refreshFarmerWallet(toCrank.farm, toCrank.farmerIdentity);
           }
         }
       });
