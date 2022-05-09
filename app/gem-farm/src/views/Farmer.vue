@@ -194,7 +194,7 @@ export default defineComponent({
       // NOTE: Configure `crankStartDate` to the date you update the farm
       // NOTE: Configure `feepayer` private key to a real wallet with a small amount of SOL
       //
-      let crankStartDate = 1649383200
+      let crankStartDate = 1652033375
 
       const feepayer: any = new NodeWallet(
         Keypair.fromSecretKey(
