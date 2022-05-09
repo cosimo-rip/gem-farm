@@ -36,7 +36,7 @@
     <div class="bg-white p-3 rounded-xl">
       <span class="text-gray-600">
         <label class="text-sm">
-        ${{SPL_TOKEN_NAME}} Redeemed
+        ${{SPL_TOKEN_NAME}} Earned
         </label><br />
         <span class="font-semibold text-indigo-600 text-3xl">{{ parseInt(farmAcc.rewardA.funds.totalAccruedToStakers ?? 0).toLocaleString() }}</span><br />
         <span class="text-xs italic text-gray-400">by all {{NFT_SHORT_NAME_SINGULAR}} holders to date</span>
