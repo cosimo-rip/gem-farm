@@ -32,7 +32,7 @@ export default function useCluster() {
       commitment: commitment ?? 'processed',
       confirmTransactionInitialTimeout: 90 * 1000,
       fetchMiddleware: tokenAuthFetchMiddleware({
-        tokenExpiry: 10, // 1 hr
+        tokenExpiry: 60 * 60 * 1000, // 1 hr
         getToken,
       }),
     });
