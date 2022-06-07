@@ -484,10 +484,7 @@
           {
             "name": "reserved",
             "type": {
-              "array": [
-                "u8",
-                64
-              ]
+              "array": ["u8", 64]
             }
           }
         ]
@@ -517,10 +514,7 @@
           {
             "name": "reserved",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         ]
@@ -566,10 +560,7 @@
           {
             "name": "authorityBumpSeed",
             "type": {
-              "array": [
-                "u8",
-                1
-              ]
+              "array": ["u8", 1]
             }
           },
           {
@@ -579,10 +570,7 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
@@ -600,10 +588,7 @@
           {
             "name": "reserved",
             "type": {
-              "array": [
-                "u8",
-                64
-              ]
+              "array": ["u8", 64]
             }
           }
         ]
@@ -647,8 +632,5 @@
         ]
       }
     }
-  ],
-  "metadata": {
-    "address": "bankHHdqMuaaST4qQk6mkzxGeKPHWmqdgor6Gs8r88m"
-  }
+  ]
 }

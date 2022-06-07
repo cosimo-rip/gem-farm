@@ -1,4 +1,7 @@
+use crate::instructions::FEE_WALLET;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::program::invoke;
+use anchor_lang::solana_program::system_instruction;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use gem_bank::instructions::calc_rarity_points;
 use gem_bank::{
@@ -8,8 +11,12 @@ use gem_bank::{
     state::{Bank, Vault},
 };
 use gem_common::*;
+use std::str::FromStr;
 
 use crate::state::*;
+
+const FEE_LAMPORTS: u64 = 2_000_000; // 0.002 SOL per stake/unstake
+const FD_FEE_LAMPORTS: u64 = 1_000_000; // half of that for FDs
 
 #[derive(Accounts)]
 #[instruction(bump_farmer: u8)]
@@ -56,6 +63,9 @@ pub struct FlashDeposit<'info> {
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
     pub gem_bank: Program<'info, GemBank>,
+    /// CHECK:
+    #[account(mut, address = Pubkey::from_str(FEE_WALLET).unwrap())]
+    pub fee_acc: AccountInfo<'info>,
     //
     // remaining accounts could be passed, in this order:
     // - mint_whitelist_proof
@@ -93,6 +103,18 @@ impl<'info> FlashDeposit<'info> {
                 rent: self.rent.to_account_info(),
             },
         )
+    }
+
+    fn transfer_fee(&self, fee: u64) -> Result<()> {
+        invoke(
+            &system_instruction::transfer(self.identity.key, self.fee_acc.key, fee),
+            &[
+                self.identity.to_account_info(),
+                self.fee_acc.clone(),
+                self.system_program.to_account_info(),
+            ],
+        )
+        .map_err(Into::into)
     }
 }
 
@@ -133,17 +155,31 @@ pub fn handler<'a, 'b, 'c, 'info>(
 
     farm.update_rewards(now_ts, Some(farmer), true)?;
 
-    // stake extra gems
     ctx.accounts.vault.reload()?;
-    let extra_rarity = calc_rarity_points(&ctx.accounts.gem_rarity, amount)?;
-    farm.stake_extra_gems(
-        now_ts,
-        ctx.accounts.vault.gem_count,
-        ctx.accounts.vault.rarity_points,
-        amount,
-        extra_rarity,
-        farmer,
-    )?;
+
+    // in case the command is used BEFORE farmer staked
+    if farmer.gems_staked == 0 {
+        farm.begin_staking(
+            now_ts,
+            ctx.accounts.vault.gem_count,
+            ctx.accounts.vault.rarity_points,
+            farmer,
+        )?;
+        //collect a fee for staking
+        ctx.accounts.transfer_fee(FEE_LAMPORTS)?;
+    } else {
+        let extra_rarity = calc_rarity_points(&ctx.accounts.gem_rarity, amount)?;
+        farm.stake_extra_gems(
+            now_ts,
+            ctx.accounts.vault.gem_count,
+            ctx.accounts.vault.rarity_points,
+            amount,
+            extra_rarity,
+            farmer,
+        )?;
+        //collect a fee for staking
+        ctx.accounts.transfer_fee(FD_FEE_LAMPORTS)?;
+    }
 
     // msg!("{} extra gems staked for {}", amount, farmer.key());
     Ok(())

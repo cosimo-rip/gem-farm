@@ -7,7 +7,7 @@
         <label class="text-sm">
         {{NFT_SHORT_NAME}} {{STAKED_NAME.toLowerCase()}}
         </label><br />
-        <span class="font-semibold text-indigo-600 text-3xl">{{ Math.ceil(100 * (farmAcc.gemsStaked ?? 0) / TOTAL_NFTS_COUNT) }}%</span><br />
+        <span class="font-semibold text-indigo-600 text-3xl">{{ Math.round(100 * (farmAcc.gemsStaked ?? 0) / TOTAL_NFTS_COUNT) }}%</span><br />
         <span class="text-xs italic text-gray-400">{{ (farmAcc.gemsStaked ?? 0) }} of {{TOTAL_NFTS_COUNT}} possible</span>
       </span>
     </div>
@@ -36,7 +36,7 @@
     <div class="bg-white p-3 rounded-xl">
       <span class="text-gray-600">
         <label class="text-sm">
-        ${{SPL_TOKEN_NAME}} Redeemed
+        ${{SPL_TOKEN_NAME}} Earned
         </label><br />
         <span class="font-semibold text-indigo-600 text-3xl">{{ parseInt(farmAcc.rewardA.funds.totalAccruedToStakers ?? 0).toLocaleString() }}</span><br />
         <span class="text-xs italic text-gray-400">by all {{NFT_SHORT_NAME_SINGULAR}} holders to date</span>
