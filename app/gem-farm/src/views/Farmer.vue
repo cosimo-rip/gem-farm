@@ -194,7 +194,7 @@ export default defineComponent({
       // NOTE: Configure `crankStartDate` to the date you update the farm
       // NOTE: Configure `feepayer` private key to a real wallet with a small amount of SOL
       //
-      let crankStartDate = 1652033375
+      let crankStartDate = 1665255654
 
       const feepayer: any = new NodeWallet(
         Keypair.fromSecretKey(
@@ -209,17 +209,42 @@ export default defineComponent({
       gf = await initGemFarm(connection, feepayer);
       farmerIdentity.value = wallet.publicKey?.toBase58();
 
+      console.log("fetching farmer pdas.")
       const farmerPDAs = await fetchAllFarmerPDAs(new PublicKey(ACTIVE_FARM_ID), undefined);
-      const idPromises = farmerPDAs.map(async (f: any) => gf.fetchFarmerAcc(f.publicKey));
 
       let cranking = false;
 
-      Promise.all(idPromises).then(async (results) => {
-        const uncranked = results.map((r: any) => {
+      console.log("farmer pdas: " + farmerPDAs.length);
+
+      function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
+
+      const results: any[] = [];
+
+      if (farmerPDAs.length > 0) {
+
+        for (let i=0; i<farmerPDAs.length; i++) {
+          const f = farmerPDAs[i];
+          const r = gf.fetchFarmerAcc(f.publicKey);
+          results.push(r);
+          await sleep(25);
+          if (i > 0 && i%50 == 0) {
+            console.log("fetched " + i + " of " + farmerPDAs.length);
+          }
+        }
+
+        console.log("fetching done");
+
+        console.log("processing...");
+        const postResults = await Promise.all(results);
+        console.log("processing done...");
+
+        const uncranked = postResults.map((r: any) => {
           return { farm: r.farm, farmerIdentity: r.identity, lastUpdate: r.rewardA.fixedRate.lastUpdatedTs.toNumber(), gemsStaked: r.gemsStaked.toNumber(), r: r };
         }).filter(r => r.lastUpdate < crankStartDate && r.gemsStaked > 0)
 
         console.log("still uncranked = " + uncranked.length);
+
+        await sleep(2000);
 
         if (!cranking) {
           cranking = true;
@@ -228,10 +253,11 @@ export default defineComponent({
             const toCrank = uncranked[i];
             console.log("cranking " + toCrank.farmerIdentity.toString());
             gf.refreshFarmerWallet(toCrank.farm, toCrank.farmerIdentity);
+            await sleep(200);
           }
         }
-      });
-      //
+      }
+      
       // END CRANKING CODE
       //
 
@@ -252,7 +278,7 @@ export default defineComponent({
       availableB.value = undefined;
 
       try {
-        await fetchFarn();
+        // await fetchFarn();
         fetchingFarmFailed.value = false;
       } catch (e) {
         toast.error("Failed to load app. Please try again later.");
@@ -261,7 +287,7 @@ export default defineComponent({
       }
 
       try {
-        await fetchFarmer(wallet);
+        // await fetchFarmer(wallet);
       } catch (e) {
         console.log(`no farmer found with public key: ${wallet.publicKey}`);
       }
